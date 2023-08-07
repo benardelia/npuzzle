@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:npuzzle/ads_helper.dart';
 import 'package:npuzzle/calculations.dart';
 import 'package:npuzzle/levels.dart';
 import 'package:npuzzle/main.dart';
@@ -12,12 +14,14 @@ class TilesGround extends StatefulWidget {
       required this.position,
       required this.comparizon1,
       required this.comparizon2,
-      required this.level});
+      required this.level,
+      required this.highLevel});
   final Size size;
   final List<Offset> position;
   final Offset comparizon1;
   final Offset comparizon2;
   final int level;
+  final int highLevel;
 
   @override
   State<TilesGround> createState() => _TilesGroundState();
@@ -34,15 +38,41 @@ class _TilesGroundState extends State<TilesGround> {
   int moves = 0;
   bool isWin = false;
   ConfettiController confet = ConfettiController();
+  BannerAd? _ad;
 
   @override
   void initState() {
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: AdSize.banner,
+      request: AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _ad = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          // Releases an ad resource when it fails to load
+          ad.dispose();
+          print('Ad load failed (code=${error.code} message=${error.message})');
+        },
+      ),
+    ).load();
+
+    PlayGroung.mainColor = Color(level.get('color'));
     super.initState();
     positionCopy.clear();
 
     for (var i in widget.position) {
       positionCopy.add(i);
     }
+  }
+
+  @override
+  void dispose() {
+    _ad != null ? _ad!.dispose() : null;
+    super.dispose();
   }
 
   @override
@@ -64,12 +94,14 @@ class _TilesGroundState extends State<TilesGround> {
               top: MediaQuery.of(context).size.height * 0.1,
               left: MediaQuery.of(context).size.width * 0.1,
               child: Text('Level: ${widget.level}',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25))),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 25))),
           Positioned(
               top: MediaQuery.of(context).size.height * 0.1,
               left: MediaQuery.of(context).size.width * 0.5,
               child: Text('Moves: $moves',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 25))),
+                  style: const TextStyle(
+                      fontWeight: FontWeight.bold, fontSize: 25))),
           tile(0),
           tile(1),
           tile(2),
@@ -82,7 +114,22 @@ class _TilesGroundState extends State<TilesGround> {
           Positioned(
               top: widget.size.height / 2,
               left: widget.size.width / 2,
-              child: applause())
+              child: applause()),
+          Align(
+              alignment: Alignment.bottomCenter,
+              child: _ad != null
+                  ? Align(
+                      alignment: Alignment.bottomCenter,
+                      child: Container(
+                        width: _ad!.size.width.toDouble(),
+                        height: 70,
+                        alignment: Alignment.center,
+                        child: AdWidget(
+                          ad: _ad!,
+                        ),
+                      ),
+                    )
+                  : const SizedBox.shrink())
         ]));
   }
 
@@ -203,7 +250,9 @@ class _TilesGroundState extends State<TilesGround> {
               }
             }
             if (passmark == 9) {
-              level.put('val', widget.level);
+              if (widget.level > widget.highLevel) {
+                level.put('val', widget.level);
+              }
               setState(() {
                 confet.play();
               });
@@ -263,7 +312,7 @@ class _TilesGroundState extends State<TilesGround> {
           width: width,
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
-              color: Color.fromARGB(255, 117, 125, 131)),
+              color: const Color.fromARGB(255, 117, 125, 131)),
         );
       }),
     );
@@ -279,6 +328,7 @@ class _TilesGroundState extends State<TilesGround> {
               Calculations.swapTiles(Levels.levels[index], Levels.winposition),
           comparizon1: widget.comparizon1,
           comparizon2: widget.comparizon2,
+          highLevel: widget.highLevel,
         );
       } else {
         return TilesGround(
@@ -288,6 +338,7 @@ class _TilesGroundState extends State<TilesGround> {
               Calculations.generateSolvabePuzzle(), Levels.winposition),
           comparizon1: widget.comparizon1,
           comparizon2: widget.comparizon2,
+          highLevel: widget.highLevel,
         );
       }
     }));

@@ -1,16 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/adapters.dart';
-
 import 'package:npuzzle/levels.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
+
   await Hive.initFlutter();
   var box = await Hive.openBox('Level');
 
   if (box.isEmpty) {
     await box.put('val', 0);
-    await box.put('color', Color(0xffa5773b).value);
+    await box.put('color', const Color(0xffa5773b).value);
   }
 
   runApp(const PlayGroung());

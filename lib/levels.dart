@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:npuzzle/ads_helper.dart';
 import 'package:npuzzle/colors.dart';
 import 'package:npuzzle/ground.dart';
 import 'package:npuzzle/main.dart';
@@ -46,11 +48,93 @@ class Levels extends StatefulWidget {
 class _LevelsState extends State<Levels> {
   var level = Hive.box('level');
   late bool initialMode;
+  BannerAd? _ad;
+  RewardedAd? _rewardedAd;
+
+  void loadRewardedAd() {
+    // rewarded ad implemented here
+    RewardedAd.load(
+      adUnitId: AdHelper.rewardAdUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+              // Called when the ad showed the full screen content.
+              onAdShowedFullScreenContent: (ad) {},
+              // Called when an impression occurs on the ad.
+              onAdImpression: (ad) {},
+              // Called when the ad failed to show full screen content.
+              onAdFailedToShowFullScreenContent: (ad, err) {
+                // Dispose the ad here to free resources.
+                ad.dispose();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Ad failed to load')));
+              },
+              // Called when the ad dismissed full screen content.
+              onAdDismissedFullScreenContent: (ad) {
+                // Dispose the ad here to free resources.
+                ad.dispose();
+              },
+              // Called when a click is recorded for an ad.
+              onAdClicked: (ad) {});
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _rewardedAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('RewardedAd failed to load: $error');
+        },
+      ),
+    ).then((value) {
+      if (_rewardedAd != null) {
+        _rewardedAd!.show(
+            onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
+          // Reward the user for watching an ad.
+          var currentLevel = level.get('val');
+          level.put('val', currentLevel + 1);
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('One level Unlocked')));
+        });
+      }
+    });
+  }
+
   @override
   void initState() {
+    // this ensure the shown add is test
+    MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
+        testDeviceIds: ['F419AB7522AEB8EEE270BFA8449DBFAD']));
+// banner ad implemented here
+    BannerAd(
+      adUnitId: AdHelper.bannerAdUnitId,
+      size: AdSize.banner,
+      request: const AdRequest(),
+      listener: BannerAdListener(
+        onAdLoaded: (ad) {
+          setState(() {
+            _ad = ad as BannerAd;
+          });
+        },
+        onAdFailedToLoad: (ad, error) {
+          // Releases an ad resource when it fails to load
+          ad.dispose();
+          print('Ad load failed (code=${error.code} message=${error.message})');
+        },
+      ),
+    ).load();
+
     super.initState();
     initialMode = widget.darkMode;
     PlayGroung.mainColor = Color(level.get('color'));
+  }
+
+  @override
+  void dispose() {
+    _ad != null ? _ad!.dispose() : null;
+    super.dispose();
   }
 
   @override
@@ -101,19 +185,38 @@ class _LevelsState extends State<Levels> {
       appBar: AppBar(
         title: const Text(
           '8-Puzzle',
-          style: const TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
         ),
         backgroundColor: PlayGroung.mainColor,
         scrolledUnderElevation: 5,
         elevation: 0,
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      floatingActionButton: Align(
+          alignment: Alignment.bottomCenter,
+          child: _ad != null
+              ? Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: _ad!.size.width.toDouble(),
+                    height: 70,
+                    alignment: Alignment.center,
+                    child: AdWidget(
+                      ad: _ad!,
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink()),
       drawer: Drawer(
         width: size.width * 0.7,
         child: Column(
           children: [
             Image.asset('assets/8puzzle.png'),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () async {
+                Navigator.pop(context);
+                loadRewardedAd();
+              },
               icon: const Icon(Icons.lock_open),
               label: const Text('Unlock level'),
             ),
@@ -168,6 +271,7 @@ class _LevelsState extends State<Levels> {
                             position: swapTiles(Levels.levels[index], position),
                             comparizon1: comparizon1,
                             comparizon2: comparizon2,
+                            highLevel: level.get('val'),
                           );
                         } else {
                           return TilesGround(
@@ -177,6 +281,7 @@ class _LevelsState extends State<Levels> {
                                 swapTiles(generateSolvabePuzzle(), position),
                             comparizon1: comparizon1,
                             comparizon2: comparizon2,
+                            highLevel: level.get('val'),
                           );
                         }
                       }));
@@ -190,11 +295,19 @@ class _LevelsState extends State<Levels> {
                     clipBehavior: Clip.antiAlias,
                     color: PlayGroung.mainColor,
                     child: Center(
-                      child: Text(
-                        'Level\n${index + 1}',
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                            fontSize: 20, fontWeight: FontWeight.bold),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Level\n${index + 1}',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(
+                                fontSize: 20, fontWeight: FontWeight.bold),
+                          ),
+                          level.get('val') < index
+                              ? const Icon(Icons.lock)
+                              : const SizedBox.shrink(),
+                        ],
                       ),
                     ),
                   ),

@@ -1,4 +1,4 @@
-package com.example.npuzzle
+package com.bravetech.npuzzle
 
 import io.flutter.embedding.android.FlutterActivity
 

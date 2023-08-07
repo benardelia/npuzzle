@@ -3,6 +3,7 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:npuzzle/main.dart';
 
+// ignore: must_be_immutable
 class PickColors extends StatelessWidget {
   PickColors({super.key});
   Color selectedColor = PlayGroung.mainColor;
