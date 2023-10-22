@@ -6,6 +6,7 @@ import 'package:npuzzle/ads_helper.dart';
 import 'package:npuzzle/colors.dart';
 import 'package:npuzzle/ground.dart';
 import 'package:npuzzle/main.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class Levels extends StatefulWidget {
   const Levels({super.key, required this.changeMode, required this.darkMode});
@@ -105,8 +106,8 @@ class _LevelsState extends State<Levels> {
   @override
   void initState() {
     // this ensure the shown add is test
-    MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
-        testDeviceIds: ['F419AB7522AEB8EEE270BFA8449DBFAD']));
+    // MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
+    //     testDeviceIds: ['F419AB7522AEB8EEE270BFA8449DBFAD']));
 // banner ad implemented here
     BannerAd(
       adUnitId: AdHelper.bannerAdUnitId,
@@ -121,7 +122,7 @@ class _LevelsState extends State<Levels> {
         onAdFailedToLoad: (ad, error) {
           // Releases an ad resource when it fails to load
           ad.dispose();
-          print('Ad load failed (code=${error.code} message=${error.message})');
+          // print('Ad load failed (code=${error.code} message=${error.message})');
         },
       ),
     ).load();
@@ -185,7 +186,10 @@ class _LevelsState extends State<Levels> {
       appBar: AppBar(
         title: const Text(
           '8-Puzzle',
-          style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+          style: TextStyle(
+              fontSize: 25,
+              fontWeight: FontWeight.normal,
+              fontFamily: 'sketch3d'),
         ),
         backgroundColor: PlayGroung.mainColor,
         scrolledUnderElevation: 5,
@@ -215,6 +219,35 @@ class _LevelsState extends State<Levels> {
             TextButton.icon(
               onPressed: () async {
                 Navigator.pop(context);
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                        actions: [
+                          TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                              },
+                              child: const Text('Back'))
+                        ],
+                        content: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              const Text(
+                                  'The objective is simple: rearrange the tiles by sliding them into the empty space until the numbers are arranged in ascending order from left to right as shown in image below.'),
+                              Image.asset('assets/goal.jpg')
+                            ],
+                          ),
+                        ),
+                      );
+                    });
+              },
+              icon: const Icon(Icons.tips_and_updates_outlined),
+              label: const Text('Goal State'),
+            ),
+            TextButton.icon(
+              onPressed: () async {
+                Navigator.pop(context);
                 loadRewardedAd();
               },
               icon: const Icon(Icons.lock_open),
@@ -235,7 +268,15 @@ class _LevelsState extends State<Levels> {
                 icon: const Icon(Icons.color_lens),
                 label: const Text('Change Color')),
             TextButton.icon(
-              onPressed: () {},
+              onPressed: () async {
+                // https://play.google.com/store/apps/details?id=com.bravetech.npuzzle
+
+                final Uri _url = Uri.parse(
+                    'https://play.google.com/store/apps/details?id=com.bravetech.npuzzle');
+                if (!await launchUrl(_url)) {
+                  throw Exception('Could not launch $_url');
+                }
+              },
               icon: const Icon(Icons.star_rate_rounded),
               label: const Text('Rate Us'),
             ),
@@ -302,7 +343,7 @@ class _LevelsState extends State<Levels> {
                             'Level\n${index + 1}',
                             textAlign: TextAlign.center,
                             style: const TextStyle(
-                                fontSize: 20, fontWeight: FontWeight.bold),
+                                fontSize: 16, fontWeight: FontWeight.bold),
                           ),
                           level.get('val') < index
                               ? const Icon(Icons.lock)

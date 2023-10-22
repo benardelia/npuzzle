@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
+import 'package:flutter/services.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:npuzzle/ads_helper.dart';
+import 'package:npuzzle/audioplayer.dart';
 import 'package:npuzzle/calculations.dart';
 import 'package:npuzzle/levels.dart';
 import 'package:npuzzle/main.dart';
+import 'package:audioplayers/audioplayers.dart';
 
 class TilesGround extends StatefulWidget {
   const TilesGround(
@@ -39,13 +42,18 @@ class _TilesGroundState extends State<TilesGround> {
   bool isWin = false;
   ConfettiController confet = ConfettiController();
   BannerAd? _ad;
+  final player = AudioPlayer();
 
   @override
   void initState() {
+    // player.setReleaseMode(ReleaseMode.release);
+    // AudioCache(prefix: "assets/").load('congratulations.mp3');
+    Player(src: 'congratulations.mp3');
+    // initiation of banner_ad
     BannerAd(
       adUnitId: AdHelper.bannerAdUnitId,
       size: AdSize.banner,
-      request: AdRequest(),
+      request: const AdRequest(),
       listener: BannerAdListener(
         onAdLoaded: (ad) {
           setState(() {
@@ -55,7 +63,7 @@ class _TilesGroundState extends State<TilesGround> {
         onAdFailedToLoad: (ad, error) {
           // Releases an ad resource when it fails to load
           ad.dispose();
-          print('Ad load failed (code=${error.code} message=${error.message})');
+          // print('Ad load failed (code=${error.code} message=${error.message})');
         },
       ),
     ).load();
@@ -72,65 +80,84 @@ class _TilesGroundState extends State<TilesGround> {
   @override
   void dispose() {
     _ad != null ? _ad!.dispose() : null;
+    // player.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        floatingActionButton: ElevatedButton.icon(
-            onPressed: () {
-              setState(() {
-                nextLevel(widget.level - 1);
-                moves = 0;
-              });
-            },
-            style:
-                ElevatedButton.styleFrom(backgroundColor: PlayGroung.mainColor),
-            icon: const Icon(Icons.restart_alt),
-            label: const Text('restart')),
+        // floatingActionButton: ElevatedButton.icon(
+        //     onPressed: () {
+        //       setState(() {
+        //         nextLevel(widget.level - 1);
+        //         moves = 0;
+        //       });
+        //     },
+        //     style:
+        //         ElevatedButton.styleFrom(backgroundColor: PlayGroung.mainColor),
+        //     icon: const Icon(Icons.restart_alt),
+        //     label: const Text('restart')),
         body: Stack(children: [
-          Positioned(
-              top: MediaQuery.of(context).size.height * 0.1,
-              left: MediaQuery.of(context).size.width * 0.1,
-              child: Text('Level: ${widget.level}',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 25))),
-          Positioned(
-              top: MediaQuery.of(context).size.height * 0.1,
-              left: MediaQuery.of(context).size.width * 0.5,
-              child: Text('Moves: $moves',
-                  style: const TextStyle(
-                      fontWeight: FontWeight.bold, fontSize: 25))),
-          tile(0),
-          tile(1),
-          tile(2),
-          tile(3),
-          tile(4),
-          tile(5),
-          tile(6),
-          tile(7),
-          target(context),
-          Positioned(
-              top: widget.size.height / 2,
-              left: widget.size.width / 2,
-              child: applause()),
-          Align(
-              alignment: Alignment.bottomCenter,
-              child: _ad != null
-                  ? Align(
-                      alignment: Alignment.bottomCenter,
-                      child: Container(
-                        width: _ad!.size.width.toDouble(),
-                        height: 70,
-                        alignment: Alignment.center,
-                        child: AdWidget(
-                          ad: _ad!,
-                        ),
-                      ),
-                    )
-                  : const SizedBox.shrink())
-        ]));
+      Positioned(
+          top: MediaQuery.of(context).size.height * 0.1,
+          left: MediaQuery.of(context).size.width * 0.1,
+          child: Text('Level: ${widget.level}',
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+      Positioned(
+          top: MediaQuery.of(context).size.height * 0.1,
+          left: MediaQuery.of(context).size.width * 0.5,
+          child: Text('Moves: $moves',
+              style:
+                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+      tile(0),
+      tile(1),
+      tile(2),
+      tile(3),
+      tile(4),
+      tile(5),
+      tile(6),
+      tile(7),
+      target(context),
+      Positioned(
+          top: widget.size.height / 2,
+          left: widget.size.width / 2,
+          child: applause()),
+      Align(
+        alignment: Alignment.bottomCenter,
+        child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+          ElevatedButton.icon(
+              onPressed: () async {
+                setState(() {
+                  nextLevel(widget.level - 1);
+                  moves = 0;
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                  backgroundColor: PlayGroung.mainColor),
+              icon: const Icon(Icons.restart_alt),
+              label: const Text('restart')),
+          // ad shown here
+          _ad != null
+              ? Align(
+                  alignment: Alignment.bottomCenter,
+                  child: Container(
+                    width: _ad!.size.width.toDouble(),
+                    height: 70,
+                    alignment: Alignment.center,
+                    child: AdWidget(
+                      ad: _ad!,
+                    ),
+                  ),
+                )
+              : const SizedBox.shrink(),
+          const SizedBox(
+            height: 10,
+          )
+        ]),
+      )
+    ]));
   }
 
   // methode to generate solvable puzzle by checkimg number of inversions
@@ -153,8 +180,13 @@ class _TilesGroundState extends State<TilesGround> {
     }
   }
 
+// methode to play congraturations sound
+  playSong() async {
+    await player.play(AssetSource('assets/congratulations.mp3'));
+  }
+
   // applause or confet widget
-  Widget applause() {
+  applause() {
     return ConfettiWidget(
       confettiController: confet,
       shouldLoop: true,
@@ -193,6 +225,7 @@ class _TilesGroundState extends State<TilesGround> {
                 '${x + 1}',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
+                  fontFamily: 'sketch3d',
                   fontSize: 30,
                   color: Colors.black.withOpacity(0.8),
                   decoration: TextDecoration.none,
@@ -209,7 +242,11 @@ class _TilesGroundState extends State<TilesGround> {
             child: Center(
                 child: Text(
               '${x + 1}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 30),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 50,
+                fontFamily: 'sketch3d',
+              ),
             )),
           )),
     );
@@ -240,7 +277,7 @@ class _TilesGroundState extends State<TilesGround> {
             positionCopy[draggedTile] = positionCopy[8];
             positionCopy[8] = data;
             moves++;
-
+            SystemSound.play(SystemSoundType.click);
             // define the winning state / check if the valid move result int winstate
             int passmark = 0;
             for (int x = 0; x < positionCopy.length; x++) {
@@ -250,6 +287,8 @@ class _TilesGroundState extends State<TilesGround> {
               }
             }
             if (passmark == 9) {
+               Player(src: 'assets/congratulations.mp3').play();
+
               if (widget.level > widget.highLevel) {
                 level.put('val', widget.level);
               }
@@ -275,12 +314,13 @@ class _TilesGroundState extends State<TilesGround> {
                         ),
                         actions: [
                           TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 Navigator.of(context).pop();
                                 setState(() {
                                   confet.stop();
                                 });
                                 nextLevel(widget.level - 1);
+                                await player.release();
                               },
                               style: TextButton.styleFrom(
                                   backgroundColor: PlayGroung.mainColor,
@@ -289,17 +329,18 @@ class _TilesGroundState extends State<TilesGround> {
                                 'Restart',
                               )),
                           TextButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 Navigator.of(context).pop();
                                 setState(() {
                                   confet.stop();
                                 });
                                 nextLevel(widget.level);
+                                await player.release();
                               },
                               style: TextButton.styleFrom(
                                   backgroundColor: PlayGroung.mainColor,
                                   foregroundColor: Colors.white),
-                              child: const Text('Next level'))
+                              child: const Text('Next level')),
                         ],
                       ));
             }
