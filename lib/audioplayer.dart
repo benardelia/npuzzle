@@ -8,7 +8,7 @@ class Player {
   final audioPlayer = AudioPlayer();
 
   load() {
-    ;
+    
   }
 
   play() {

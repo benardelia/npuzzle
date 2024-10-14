@@ -51,7 +51,7 @@ class _LevelsState extends State<Levels> {
   late bool initialMode;
   BannerAd? _ad;
   RewardedAd? _rewardedAd;
-
+  int tries = 0;
   void loadRewardedAd() {
     // rewarded ad implemented here
     RewardedAd.load(
@@ -90,6 +90,7 @@ class _LevelsState extends State<Levels> {
       ),
     ).then((value) {
       if (_rewardedAd != null) {
+        tries = 0;
         _rewardedAd!.show(
             onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
           // Reward the user for watching an ad.
@@ -99,6 +100,11 @@ class _LevelsState extends State<Levels> {
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('One level Unlocked')));
         });
+      } else {
+        if (tries < 4) {
+          loadRewardedAd();
+        }
+        tries++;
       }
     });
   }
@@ -109,23 +115,23 @@ class _LevelsState extends State<Levels> {
     // MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
     //     testDeviceIds: ['F419AB7522AEB8EEE270BFA8449DBFAD']));
 // banner ad implemented here
-    BannerAd(
-      adUnitId: AdHelper.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _ad = ad as BannerAd;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          // Releases an ad resource when it fails to load
-          ad.dispose();
-          // print('Ad load failed (code=${error.code} message=${error.message})');
-        },
-      ),
-    ).load();
+    // BannerAd(
+    //   adUnitId: AdHelper.bannerAdUnitId,
+    //   size: AdSize.banner,
+    //   request: const AdRequest(),
+    //   listener: BannerAdListener(
+    //     onAdLoaded: (ad) {
+    //       setState(() {
+    //         _ad = ad as BannerAd;
+    //       });
+    //     },
+    //     onAdFailedToLoad: (ad, error) {
+    //       // Releases an ad resource when it fails to load
+    //       ad.dispose();
+    //       // print('Ad load failed (code=${error.code} message=${error.message})');
+    //     },
+    //   ),
+    // ).load();
 
     super.initState();
     initialMode = widget.darkMode;
@@ -195,22 +201,22 @@ class _LevelsState extends State<Levels> {
         scrolledUnderElevation: 5,
         elevation: 0,
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      floatingActionButton: Align(
-          alignment: Alignment.bottomCenter,
-          child: _ad != null
-              ? Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    width: _ad!.size.width.toDouble(),
-                    height: 70,
-                    alignment: Alignment.center,
-                    child: AdWidget(
-                      ad: _ad!,
-                    ),
-                  ),
-                )
-              : const SizedBox.shrink()),
+      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      // floatingActionButton: Align(
+      //     alignment: Alignment.bottomCenter,
+      //     child: _ad != null
+      //         ? Align(
+      //             alignment: Alignment.bottomCenter,
+      //             child: Container(
+      //               width: _ad!.size.width.toDouble(),
+      //               height: 70,
+      //               alignment: Alignment.center,
+      //               child: AdWidget(
+      //                 ad: _ad!,
+      //               ),
+      //             ),
+      //           )
+      //         : const SizedBox.shrink()),
       drawer: Drawer(
         width: size.width * 0.7,
         child: Column(
@@ -248,6 +254,7 @@ class _LevelsState extends State<Levels> {
             TextButton.icon(
               onPressed: () async {
                 Navigator.pop(context);
+                // RewardAd().loadRewardedAd();
                 loadRewardedAd();
               },
               icon: const Icon(Icons.lock_open),

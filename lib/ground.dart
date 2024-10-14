@@ -75,6 +75,7 @@ class _TilesGroundState extends State<TilesGround> {
     for (var i in widget.position) {
       positionCopy.add(i);
     }
+    loadRewardedAd();
   }
 
   @override
@@ -87,30 +88,36 @@ class _TilesGroundState extends State<TilesGround> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        // floatingActionButton: ElevatedButton.icon(
-        //     onPressed: () {
-        //       setState(() {
-        //         nextLevel(widget.level - 1);
-        //         moves = 0;
-        //       });
-        //     },
-        //     style:
-        //         ElevatedButton.styleFrom(backgroundColor: PlayGroung.mainColor),
-        //     icon: const Icon(Icons.restart_alt),
-        //     label: const Text('restart')),
+        
         body: Stack(children: [
       Positioned(
           top: MediaQuery.of(context).size.height * 0.1,
-          left: MediaQuery.of(context).size.width * 0.1,
+          left: MediaQuery.of(context).size.width * 0.05,
           child: Text('Level: ${widget.level}',
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
       Positioned(
           top: MediaQuery.of(context).size.height * 0.1,
-          left: MediaQuery.of(context).size.width * 0.5,
+          left: MediaQuery.of(context).size.width * 0.45,
           child: Text('Moves: $moves',
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
+      Positioned(
+          top: MediaQuery.of(context).size.height * 0.07,
+          left: MediaQuery.of(context).size.width * 0.8,
+          child: IconButton(
+              onPressed: () {
+                loadRewardedAd();
+              },
+              icon: Icon(
+                Icons.lightbulb,
+                color: moves > 50
+                    ? Color.fromARGB(255, 247, 172, 11)
+                    : moves > 40
+                        ? Color.fromARGB(255, 33, 233, 15)  : moves > 30? Color.fromARGB(255, 126, 240, 116)
+                        : Color.fromARGB(255, 238, 226, 201),
+                size: MediaQuery.of(context).size.height * 0.07,
+              ))),
       tile(0),
       tile(1),
       tile(2),
@@ -138,6 +145,9 @@ class _TilesGroundState extends State<TilesGround> {
                   backgroundColor: PlayGroung.mainColor),
               icon: const Icon(Icons.restart_alt),
               label: const Text('restart')),
+          const Divider(
+            height: 10,
+          ),
           // ad shown here
           _ad != null
               ? Align(
@@ -151,7 +161,9 @@ class _TilesGroundState extends State<TilesGround> {
                     ),
                   ),
                 )
-              : const SizedBox.shrink(),
+              : const SizedBox(
+                  height: 80,
+                ),
           const SizedBox(
             height: 10,
           )
@@ -287,7 +299,7 @@ class _TilesGroundState extends State<TilesGround> {
               }
             }
             if (passmark == 9) {
-               Player(src: 'assets/congratulations.mp3').play();
+              Player(src: 'assets/congratulations.mp3').play();
 
               if (widget.level > widget.highLevel) {
                 level.put('val', widget.level);
@@ -384,4 +396,67 @@ class _TilesGroundState extends State<TilesGround> {
       }
     }));
   }
+
+  void loadRewardedAd() {
+    // rewarded ad implemented here
+    RewardedAd.load(
+      adUnitId: AdHelper.rewardAdUnitId,
+      request: const AdRequest(),
+      rewardedAdLoadCallback: RewardedAdLoadCallback(
+        // Called when an ad is successfully received.
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+              // Called when the ad showed the full screen content.
+              onAdShowedFullScreenContent: (ad) {},
+              // Called when an impression occurs on the ad.
+              onAdImpression: (ad) {},
+              // Called when the ad failed to show full screen content.
+              onAdFailedToShowFullScreenContent: (ad, err) {
+                // Dispose the ad here to free resources.
+                ad.dispose();
+                ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Ad failed to load')));
+              },
+              // Called when the ad dismissed full screen content.
+              onAdDismissedFullScreenContent: (ad) {
+                // Dispose the ad here to free resources.
+                ad.dispose();
+              },
+              // Called when a click is recorded for an ad.
+              onAdClicked: (ad) {});
+          debugPrint('$ad loaded.');
+          // Keep a reference to the ad so you can show it later.
+          _rewardedAd = ad;
+        },
+        // Called when an ad request failed.
+        onAdFailedToLoad: (LoadAdError error) {
+          debugPrint('RewardedAd failed to load: $error');
+        },
+      ),
+    ).then((value) {
+      if (_rewardedAd != null) {
+        tries = 0;
+        _rewardedAd!.show(
+            onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
+          // Reward the user for watching an ad.
+          var currentLevel = level.get('val');
+          level.put('val', currentLevel + 1);
+          nextLevel(widget.level);
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('One level Unlocked')));
+        });
+      } else {
+        if (tries < 5) {
+          loadRewardedAd();
+          print(
+              '==========================================================================================================');
+        }
+        tries++;
+      }
+    });
+  }
+
+  RewardedAd? _rewardedAd;
+  int tries = 0;
 }
