@@ -111,28 +111,6 @@ class _LevelsState extends State<Levels> {
 
   @override
   void initState() {
-    // this ensure the shown add is test
-    // MobileAds.instance.updateRequestConfiguration(RequestConfiguration(
-    //     testDeviceIds: ['F419AB7522AEB8EEE270BFA8449DBFAD']));
-// banner ad implemented here
-    // BannerAd(
-    //   adUnitId: AdHelper.bannerAdUnitId,
-    //   size: AdSize.banner,
-    //   request: const AdRequest(),
-    //   listener: BannerAdListener(
-    //     onAdLoaded: (ad) {
-    //       setState(() {
-    //         _ad = ad as BannerAd;
-    //       });
-    //     },
-    //     onAdFailedToLoad: (ad, error) {
-    //       // Releases an ad resource when it fails to load
-    //       ad.dispose();
-    //       // print('Ad load failed (code=${error.code} message=${error.message})');
-    //     },
-    //   ),
-    // ).load();
-
     super.initState();
     initialMode = widget.darkMode;
     PlayGroung.mainColor = Color(level.get('color'));
@@ -140,7 +118,8 @@ class _LevelsState extends State<Levels> {
 
   @override
   void dispose() {
-    _ad != null ? _ad!.dispose() : null;
+    _ad?.dispose();
+    _rewardedAd?.dispose();
     super.dispose();
   }
 

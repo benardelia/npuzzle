@@ -88,7 +88,6 @@ class _TilesGroundState extends State<TilesGround> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        
         body: Stack(children: [
       Positioned(
           top: MediaQuery.of(context).size.height * 0.1,
@@ -114,8 +113,10 @@ class _TilesGroundState extends State<TilesGround> {
                 color: moves > 50
                     ? Color.fromARGB(255, 247, 172, 11)
                     : moves > 40
-                        ? Color.fromARGB(255, 33, 233, 15)  : moves > 30? Color.fromARGB(255, 126, 240, 116)
-                        : Color.fromARGB(255, 238, 226, 201),
+                        ? Color.fromARGB(255, 33, 233, 15)
+                        : moves > 30
+                            ? Color.fromARGB(255, 126, 240, 116)
+                            : Color.fromARGB(255, 238, 226, 201),
                 size: MediaQuery.of(context).size.height * 0.07,
               ))),
       tile(0),

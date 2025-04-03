@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/adapters.dart';
@@ -5,7 +7,7 @@ import 'package:npuzzle/levels.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  MobileAds.instance.initialize();
+  unawaited(MobileAds.instance.initialize());
 
   await Hive.initFlutter();
   var box = await Hive.openBox('Level');
