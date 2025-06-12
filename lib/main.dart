@@ -1,9 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:npuzzle/levels.dart';
+import 'package:npuzzle/state_management.dart/app_controller.dart';
+import 'package:npuzzle/state_management.dart/controller_registry.dart';
+import 'package:npuzzle/utils/theme.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +20,8 @@ void main() async {
     await box.put('val', 0);
     await box.put('color', const Color(0xffa5773b).value);
   }
+
+  registerControllers();
 
   runApp(const PlayGroung());
 }
@@ -30,32 +36,27 @@ class PlayGroung extends StatefulWidget {
 }
 
 class _PlayGroungState extends State<PlayGroung> {
-  bool isDark = false;
-  void changeMode(bool val) {
-    setState(() {
-      isDark = val;
-    });
+  AppController appController = Get.find<AppController>();
+
+  @override
+  void initState() {
+    
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-          useMaterial3: true,
-          brightness: isDark ? Brightness.dark : Brightness.light,
-          textTheme:const TextTheme(
-              displayLarge: TextStyle(fontFamily: 'heros'),
-              bodyLarge: TextStyle(fontFamily: 'heros'),
-              bodyMedium: TextStyle(fontFamily: 'heros'),
-              bodySmall: TextStyle(fontFamily: 'heros'),
-              labelLarge: TextStyle(fontFamily: 'heros'),
-              labelSmall: TextStyle(fontFamily: 'heros'),
-              labelMedium: TextStyle(fontFamily: 'heros'))),
-      debugShowCheckedModeBanner: false,
-      home: Levels(
-        changeMode: changeMode,
-        darkMode: isDark,
-      ),
-    );
+    return Obx(() {
+      return GetMaterialApp(
+        theme: ThemeData(
+            useMaterial3: true,
+            brightness: appController.isDarkTheme.value
+                ? Brightness.dark
+                : Brightness.light,
+            textTheme: textTheme),
+        debugShowCheckedModeBanner: false,
+        home: const Levels(),
+      );
+    });
   }
 }

@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:npuzzle/ads_helper.dart';
-import 'package:npuzzle/colors.dart';
 import 'package:npuzzle/ground.dart';
-import 'package:npuzzle/main.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:npuzzle/state_management.dart/app_controller.dart';
+import 'package:npuzzle/widgets/drawer.dart';
+import 'package:npuzzle/widgets/instruction.dart';
 
 class Levels extends StatefulWidget {
-  const Levels({super.key, required this.changeMode, required this.darkMode});
-  final Function changeMode;
-  final bool darkMode;
+  const Levels({super.key});
+
   static late List<Offset> winposition;
   static List levels = [
     [0, 1, 2, 3, 4, 5, 6, 8, 7],
@@ -47,6 +47,7 @@ class Levels extends StatefulWidget {
 }
 
 class _LevelsState extends State<Levels> {
+  var controller = Get.find<AppController>();
   var level = Hive.box('level');
   late bool initialMode;
   BannerAd? _ad;
@@ -112,8 +113,6 @@ class _LevelsState extends State<Levels> {
   @override
   void initState() {
     super.initState();
-    initialMode = widget.darkMode;
-    PlayGroung.mainColor = Color(level.get('color'));
   }
 
   @override
@@ -126,8 +125,8 @@ class _LevelsState extends State<Levels> {
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
-    SystemChrome.setSystemUIOverlayStyle(
-        SystemUiOverlayStyle(systemNavigationBarColor: PlayGroung.mainColor));
+    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+        systemNavigationBarColor: controller.appColor.value));
     // swapa(lvls);
     List<Offset> position = List.generate(
       9,
@@ -168,6 +167,16 @@ class _LevelsState extends State<Levels> {
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          showDialog(
+              context: context,
+              builder: (context) {
+                return const Instruction();
+              });
+        },
+        child: const Icon(Icons.info_outline),
+      ),
       appBar: AppBar(
         title: const Text(
           '8-Puzzle',
@@ -176,111 +185,11 @@ class _LevelsState extends State<Levels> {
               fontWeight: FontWeight.normal,
               fontFamily: 'sketch3d'),
         ),
-        backgroundColor: PlayGroung.mainColor,
+        backgroundColor: controller.appColor.value,
         scrolledUnderElevation: 5,
         elevation: 0,
       ),
-      // floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      // floatingActionButton: Align(
-      //     alignment: Alignment.bottomCenter,
-      //     child: _ad != null
-      //         ? Align(
-      //             alignment: Alignment.bottomCenter,
-      //             child: Container(
-      //               width: _ad!.size.width.toDouble(),
-      //               height: 70,
-      //               alignment: Alignment.center,
-      //               child: AdWidget(
-      //                 ad: _ad!,
-      //               ),
-      //             ),
-      //           )
-      //         : const SizedBox.shrink()),
-      drawer: Drawer(
-        width: size.width * 0.7,
-        child: Column(
-          children: [
-            Image.asset('assets/8puzzle.png'),
-            TextButton.icon(
-              onPressed: () async {
-                Navigator.pop(context);
-                showDialog(
-                    context: context,
-                    builder: (context) {
-                      return AlertDialog(
-                        actions: [
-                          TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              child: const Text('Back'))
-                        ],
-                        content: SingleChildScrollView(
-                          child: Column(
-                            children: [
-                              const Text(
-                                  'The objective is simple: rearrange the tiles by sliding them into the empty space until the numbers are arranged in ascending order from left to right as shown in image below.'),
-                              Image.asset('assets/goal.jpg')
-                            ],
-                          ),
-                        ),
-                      );
-                    });
-              },
-              icon: const Icon(Icons.tips_and_updates_outlined),
-              label: const Text('Goal State'),
-            ),
-            TextButton.icon(
-              onPressed: () async {
-                Navigator.pop(context);
-                // RewardAd().loadRewardedAd();
-                loadRewardedAd();
-              },
-              icon: const Icon(Icons.lock_open),
-              label: const Text('Unlock level'),
-            ),
-            TextButton.icon(
-                onPressed: () {
-                  Navigator.pop(context);
-                  showDialog(
-                          context: context, builder: (context) => PickColors())
-                      .then((value) => setState(() {
-                            SystemChrome.setSystemUIOverlayStyle(
-                                SystemUiOverlayStyle(
-                                    systemNavigationBarColor:
-                                        PlayGroung.mainColor));
-                          }));
-                },
-                icon: const Icon(Icons.color_lens),
-                label: const Text('Change Color')),
-            TextButton.icon(
-              onPressed: () async {
-                // https://play.google.com/store/apps/details?id=com.bravetech.npuzzle
-
-                final Uri _url = Uri.parse(
-                    'https://play.google.com/store/apps/details?id=com.bravetech.npuzzle');
-                if (!await launchUrl(_url)) {
-                  throw Exception('Could not launch $_url');
-                }
-              },
-              icon: const Icon(Icons.star_rate_rounded),
-              label: const Text('Rate Us'),
-            ),
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const Icon(Icons.light_mode_outlined),
-                Switch(
-                    value: initialMode,
-                    onChanged: (value) {
-                      initialMode = !initialMode;
-                      widget.changeMode(initialMode);
-                    })
-              ],
-            )
-          ],
-        ),
-      ),
+      drawer: const SideNavigator(),
       body: Padding(
         padding: const EdgeInsets.all(12.0),
         child: GridView.builder(
@@ -320,7 +229,7 @@ class _LevelsState extends State<Levels> {
                   },
                   child: Card(
                     clipBehavior: Clip.antiAlias,
-                    color: PlayGroung.mainColor,
+                    color: controller.appColor.value,
                     child: Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,

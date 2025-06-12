@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:npuzzle/main.dart';
+import 'package:npuzzle/state_management.dart/app_controller.dart';
 
 // ignore: must_be_immutable
 class PickColors extends StatelessWidget {
@@ -30,7 +32,8 @@ class PickColors extends StatelessWidget {
             child: const Text('Cancel')),
         TextButton(
             onPressed: () async {
-              PlayGroung.mainColor = selectedColor;
+             var appController = Get.find<AppController>();
+             appController.appColor.value = selectedColor;
               Navigator.pop(context);
               await box.put('color', selectedColor.value);
             },
