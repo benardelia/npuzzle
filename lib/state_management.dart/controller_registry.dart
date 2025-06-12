@@ -1,5 +1,4 @@
 import 'package:get/get.dart';
-import 'package:npuzzle/inapp_purchase/inapp_purchase_util.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
 
 void registerControllers() {
