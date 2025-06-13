@@ -29,8 +29,6 @@ void main() async {
 class PlayGroung extends StatefulWidget {
   const PlayGroung({super.key});
 
-  static late Color mainColor;
-
   @override
   State<PlayGroung> createState() => _PlayGroungState();
 }
@@ -40,7 +38,6 @@ class _PlayGroungState extends State<PlayGroung> {
 
   @override
   void initState() {
-    
     super.initState();
   }
 
@@ -56,6 +53,11 @@ class _PlayGroungState extends State<PlayGroung> {
             textTheme: textTheme),
         debugShowCheckedModeBanner: false,
         home: const Levels(),
+        // initialBinding: BindingsBuilder(
+        //   () {
+        //     Get.put<InAppPurchaseUtil>(inappPurchaseUtil);
+        //   },
+        // ),
       );
     });
   }

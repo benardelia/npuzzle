@@ -59,7 +59,7 @@ class AdHelper {
   }
 }
 
-// Ad helper for test ad 
+// Ad helper for test ad
 class AdHelperTest {
   static String get bannerAdUnitId {
     if (Platform.isAndroid) {

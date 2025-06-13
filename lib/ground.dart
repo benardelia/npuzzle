@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:npuzzle/ads_helper.dart';
 import 'package:npuzzle/audioplayer.dart';
 import 'package:npuzzle/calculations.dart';
 import 'package:npuzzle/levels.dart';
-import 'package:npuzzle/main.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:npuzzle/state_management.dart/ads_controller.dart';
+import 'package:npuzzle/state_management.dart/app_controller.dart';
 
 class TilesGround extends StatefulWidget {
   const TilesGround(
@@ -37,51 +37,33 @@ class _TilesGroundState extends State<TilesGround> {
   // value of dragged tile, should be updated when ever the tile is draged
   // and seted to the current dragged tile
   int draggedTile = 0;
-  // Color favoriteColor = Color.fromARGB(255, 114, 124, 58);
   int moves = 0;
   bool isWin = false;
   ConfettiController confet = ConfettiController();
-  BannerAd? _ad;
   final player = AudioPlayer();
+
+  AppController appController = Get.find<AppController>();
+  AdsController adsController = Get.find();
 
   @override
   void initState() {
-    // player.setReleaseMode(ReleaseMode.release);
-    // AudioCache(prefix: "assets/").load('congratulations.mp3');
-    Player(src: 'congratulations.mp3');
-    // initiation of banner_ad
-    BannerAd(
-      adUnitId: AdHelper.bannerAdUnitId,
-      size: AdSize.banner,
-      request: const AdRequest(),
-      listener: BannerAdListener(
-        onAdLoaded: (ad) {
-          setState(() {
-            _ad = ad as BannerAd;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          // Releases an ad resource when it fails to load
-          ad.dispose();
-          // print('Ad load failed (code=${error.code} message=${error.message})');
-        },
-      ),
-    ).load();
-
-    PlayGroung.mainColor = Color(level.get('color'));
+    adsController.loadBannerAd();
     super.initState();
     positionCopy.clear();
 
     for (var i in widget.position) {
       positionCopy.add(i);
     }
-    loadRewardedAd();
+    appController.countDown(() {
+      adsController.showRewardedAd();
+    });
+    // loadRewardedAd();
   }
 
   @override
   void dispose() {
-    _ad != null ? _ad!.dispose() : null;
-    // player.dispose();
+    player.dispose();
+    appController.timer?.cancel();
     super.dispose();
   }
 
@@ -106,17 +88,18 @@ class _TilesGroundState extends State<TilesGround> {
           left: MediaQuery.of(context).size.width * 0.8,
           child: IconButton(
               onPressed: () {
-                loadRewardedAd();
+                // loadRewardedAd();
+                adsController.showRewardedAd();
               },
               icon: Icon(
                 Icons.lightbulb,
                 color: moves > 50
-                    ? Color.fromARGB(255, 247, 172, 11)
+                    ? const Color.fromARGB(255, 247, 172, 11)
                     : moves > 40
-                        ? Color.fromARGB(255, 33, 233, 15)
+                        ? const Color.fromARGB(255, 33, 233, 15)
                         : moves > 30
-                            ? Color.fromARGB(255, 126, 240, 116)
-                            : Color.fromARGB(255, 238, 226, 201),
+                            ? const Color.fromARGB(255, 126, 240, 116)
+                            : const Color.fromARGB(255, 238, 226, 201),
                 size: MediaQuery.of(context).size.height * 0.07,
               ))),
       tile(0),
@@ -135,33 +118,38 @@ class _TilesGroundState extends State<TilesGround> {
       Align(
         alignment: Alignment.bottomCenter,
         child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-          ElevatedButton.icon(
-              onPressed: () async {
-                setState(() {
-                  nextLevel(widget.level - 1);
-                  moves = 0;
-                });
-              },
-              style: ElevatedButton.styleFrom(
-                  backgroundColor: PlayGroung.mainColor),
-              icon: const Icon(Icons.restart_alt),
-              label: const Text('restart')),
+          Container(
+            decoration: BoxDecoration(
+                color: Colors.white.withAlpha(20),
+                borderRadius: BorderRadius.circular(20)),
+            child: Obx(() {
+              return Padding(
+                padding: const EdgeInsets.all(18.0),
+                child: Text(
+                    'Remaining Time: ${appController.gamePeriod.value.toString().padLeft(2, '0')}'),
+              );
+            }),
+          ),
           const Divider(
             height: 10,
           ),
           // ad shown here
-          _ad != null
-              ? Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    width: _ad!.size.width.toDouble(),
-                    height: 70,
-                    alignment: Alignment.center,
-                    child: AdWidget(
-                      ad: _ad!,
+          // _ad != null
+          adsController.bunnerAd?.value != null
+              ? Obx(() {
+                  return Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      width:
+                          adsController.bunnerAd?.value.size.width.toDouble(),
+                      height: 70,
+                      alignment: Alignment.center,
+                      child: AdWidget(
+                        ad: adsController.bunnerAd!.value,
+                      ),
                     ),
-                  ),
-                )
+                  );
+                })
               : const SizedBox(
                   height: 80,
                 ),
@@ -229,7 +217,7 @@ class _TilesGroundState extends State<TilesGround> {
           feedback: Container(
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(5),
-              color: PlayGroung.mainColor.withOpacity(0.8),
+              color: appController.appColor.value.withAlpha(200),
             ),
             height: height,
             width: width,
@@ -249,7 +237,7 @@ class _TilesGroundState extends State<TilesGround> {
           child: Container(
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(5),
-                color: PlayGroung.mainColor),
+                color: appController.appColor.value),
             height: height,
             width: width,
             child: Center(
@@ -265,7 +253,6 @@ class _TilesGroundState extends State<TilesGround> {
     );
   }
 
-  var level = Hive.box('level');
   target(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     double height = size.height / 2 / 3 - 10;
@@ -303,7 +290,7 @@ class _TilesGroundState extends State<TilesGround> {
               Player(src: 'assets/congratulations.mp3').play();
 
               if (widget.level > widget.highLevel) {
-                level.put('val', widget.level);
+                appController.appBox.put('val', widget.level);
               }
               setState(() {
                 confet.play();
@@ -319,7 +306,7 @@ class _TilesGroundState extends State<TilesGround> {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 30,
-                                color: PlayGroung.mainColor,
+                                color: appController.appColor.value,
                                 decoration: TextDecoration.none,
                               ),
                             ),
@@ -336,7 +323,7 @@ class _TilesGroundState extends State<TilesGround> {
                                 await player.release();
                               },
                               style: TextButton.styleFrom(
-                                  backgroundColor: PlayGroung.mainColor,
+                                  backgroundColor: appController.appColor.value,
                                   foregroundColor: Colors.white),
                               child: const Text(
                                 'Restart',
@@ -351,7 +338,7 @@ class _TilesGroundState extends State<TilesGround> {
                                 await player.release();
                               },
                               style: TextButton.styleFrom(
-                                  backgroundColor: PlayGroung.mainColor,
+                                  backgroundColor: appController.appColor.value,
                                   foregroundColor: Colors.white),
                               child: const Text('Next level')),
                         ],
@@ -397,67 +384,4 @@ class _TilesGroundState extends State<TilesGround> {
       }
     }));
   }
-
-  void loadRewardedAd() {
-    // rewarded ad implemented here
-    RewardedAd.load(
-      adUnitId: AdHelper.rewardAdUnitId,
-      request: const AdRequest(),
-      rewardedAdLoadCallback: RewardedAdLoadCallback(
-        // Called when an ad is successfully received.
-        onAdLoaded: (ad) {
-          ad.fullScreenContentCallback = FullScreenContentCallback(
-              // Called when the ad showed the full screen content.
-              onAdShowedFullScreenContent: (ad) {},
-              // Called when an impression occurs on the ad.
-              onAdImpression: (ad) {},
-              // Called when the ad failed to show full screen content.
-              onAdFailedToShowFullScreenContent: (ad, err) {
-                // Dispose the ad here to free resources.
-                ad.dispose();
-                ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Ad failed to load')));
-              },
-              // Called when the ad dismissed full screen content.
-              onAdDismissedFullScreenContent: (ad) {
-                // Dispose the ad here to free resources.
-                ad.dispose();
-              },
-              // Called when a click is recorded for an ad.
-              onAdClicked: (ad) {});
-          debugPrint('$ad loaded.');
-          // Keep a reference to the ad so you can show it later.
-          _rewardedAd = ad;
-        },
-        // Called when an ad request failed.
-        onAdFailedToLoad: (LoadAdError error) {
-          debugPrint('RewardedAd failed to load: $error');
-        },
-      ),
-    ).then((value) {
-      if (_rewardedAd != null) {
-        tries = 0;
-        _rewardedAd!.show(
-            onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
-          // Reward the user for watching an ad.
-          var currentLevel = level.get('val');
-          level.put('val', currentLevel + 1);
-          nextLevel(widget.level);
-          setState(() {});
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('One level Unlocked')));
-        });
-      } else {
-        if (tries < 5) {
-          loadRewardedAd();
-          print(
-              '==========================================================================================================');
-        }
-        tries++;
-      }
-    });
-  }
-
-  RewardedAd? _rewardedAd;
-  int tries = 0;
 }

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:npuzzle/ads_helper.dart';
 import 'package:npuzzle/ground.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
@@ -48,7 +47,6 @@ class Levels extends StatefulWidget {
 
 class _LevelsState extends State<Levels> {
   var controller = Get.find<AppController>();
-  var level = Hive.box('level');
   late bool initialMode;
   BannerAd? _ad;
   RewardedAd? _rewardedAd;
@@ -95,8 +93,8 @@ class _LevelsState extends State<Levels> {
         _rewardedAd!.show(
             onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) {
           // Reward the user for watching an ad.
-          var currentLevel = level.get('val');
-          level.put('val', currentLevel + 1);
+          var currentLevel = controller.appBox.get('val');
+          controller.appBox.put('val', currentLevel + 1);
           setState(() {});
           ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('One level Unlocked')));
@@ -190,65 +188,68 @@ class _LevelsState extends State<Levels> {
         elevation: 0,
       ),
       drawer: const SideNavigator(),
-      body: Padding(
-        padding: const EdgeInsets.all(12.0),
-        child: GridView.builder(
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3),
-            itemBuilder: (context, index) => InkWell(
-                  onTap: () {
-                    if (level.get('val') >= index) {
-                      Navigator.of(context)
-                          .push(MaterialPageRoute(builder: (context) {
-                        if (index < 25) {
-                          return TilesGround(
-                            level: index + 1,
-                            size: size,
-                            position: swapTiles(Levels.levels[index], position),
-                            comparizon1: comparizon1,
-                            comparizon2: comparizon2,
-                            highLevel: level.get('val'),
-                          );
-                        } else {
-                          return TilesGround(
-                            level: index + 1,
-                            size: size,
-                            position:
-                                swapTiles(generateSolvabePuzzle(), position),
-                            comparizon1: comparizon1,
-                            comparizon2: comparizon2,
-                            highLevel: level.get('val'),
-                          );
-                        }
-                      }));
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                          content: Text(
-                              'Your current level is ${level.get('val') + 1} please finish previous levels')));
-                    }
-                  },
-                  child: Card(
-                    clipBehavior: Clip.antiAlias,
-                    color: controller.appColor.value,
-                    child: Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Level\n${index + 1}',
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                                fontSize: 16, fontWeight: FontWeight.bold),
-                          ),
-                          level.get('val') < index
-                              ? const Icon(Icons.lock)
-                              : const SizedBox.shrink(),
-                        ],
+      body: Obx(() {
+        controller.currentLevel.value;
+        return Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3),
+              itemBuilder: (context, index) => InkWell(
+                    onTap: () {
+                      if (controller.appBox.get('val') >= index) {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (context) {
+                          if (index < 25) {
+                            return TilesGround(
+                              level: index + 1,
+                              size: size,
+                              position:
+                                  swapTiles(Levels.levels[index], position),
+                              comparizon1: comparizon1,
+                              comparizon2: comparizon2,
+                              highLevel: controller.appBox.get('val'),
+                            );
+                          } else {
+                            return TilesGround(
+                              level: index + 1,
+                              size: size,
+                              position:
+                                  swapTiles(generateSolvabePuzzle(), position),
+                              comparizon1: comparizon1,
+                              comparizon2: comparizon2,
+                              highLevel: controller.appBox.get('val'),
+                            );
+                          }
+                        }));
+                      } else {
+                        Get.snackbar('Level Locked',
+                            'Your current level is ${controller.appBox.get('val') + 1} please finish previous levels', );
+                      }
+                    },
+                    child: Card(
+                      clipBehavior: Clip.antiAlias,
+                      color: controller.appColor.value,
+                      child: Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Level\n${index + 1}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
+                            controller.appBox.get('val') < index
+                                ? const Icon(Icons.lock)
+                                : const SizedBox.shrink(),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                )),
-      ),
+                  )),
+        );
+      }),
     );
   }
 

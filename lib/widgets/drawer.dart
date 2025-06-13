@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:npuzzle/colors.dart';
+import 'package:npuzzle/inapp_purchase/inapp_purchase_util.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
 import 'package:npuzzle/utils/logger.dart';
 import 'package:npuzzle/widgets/instruction.dart' show Instruction;
@@ -13,6 +14,7 @@ class SideNavigator extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<AppController>();
+    final inAppPurchaseUtil = Get.find<InAppPurchaseUtil>();
     return Drawer(
       width: Get.width * 0.7,
       child: Column(
@@ -33,31 +35,30 @@ class SideNavigator extends StatelessWidget {
           TextButton.icon(
             onPressed: () async {
               Navigator.pop(context);
-              // RewardAd().loadRewardedAd();
-              // loadRewardedAd();
+              Get.back();
+              inAppPurchaseUtil.buyNonConsumable('8_puzzle');
             },
             icon: const Icon(Icons.lock_open),
-            label: const Text('Unlock level'),
+            label: const Text('Unlock levels'),
           ),
           TextButton.icon(
               onPressed: () {
                 Navigator.pop(context);
-                showDialog(context: context, builder: (context) => PickColors())
-                    .then((value) => SystemChrome.setSystemUIOverlayStyle(
-                        SystemUiOverlayStyle(
-                            systemNavigationBarColor:
-                                controller.appColor.value)));
+                showDialog(
+                    context: context,
+                    builder: (context) =>
+                        const PickColors()).then((value) =>
+                    SystemChrome.setSystemUIOverlayStyle(SystemUiOverlayStyle(
+                        systemNavigationBarColor: controller.appColor.value)));
               },
               icon: const Icon(Icons.color_lens),
               label: const Text('Change Color')),
           TextButton.icon(
             onPressed: () async {
-              // https://play.google.com/store/apps/details?id=com.bravetech.npuzzle
-
-              final Uri _url = Uri.parse(
+              final Uri url = Uri.parse(
                   'https://play.google.com/store/apps/details?id=com.bravetech.npuzzle');
-              if (!await launchUrl(_url)) {
-                throw Exception('Could not launch $_url');
+              if (!await launchUrl(url)) {
+                throw Exception('Could not launch $url');
               }
             },
             icon: const Icon(Icons.star_rate_rounded),
@@ -74,6 +75,8 @@ class SideNavigator extends StatelessWidget {
                       Log.i('Theme changed to ${value ? 'Dark' : 'Light'}');
                       controller.isDarkTheme.value =
                           !(controller.isDarkTheme.value);
+                      controller.appBox
+                          .put('isDarkTheme', controller.isDarkTheme.value);
                     });
               })
             ],
