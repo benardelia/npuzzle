@@ -8,7 +8,7 @@ import 'package:hive_flutter/adapters.dart';
 class AppController extends GetxController {
   RxBool isDarkTheme = false.obs;
 
-  Rx<Color> appColor = const Color.fromARGB(255, 233, 210, 76).obs; // add this
+  Rx<Color> appColor = const Color(0xffece1cd).obs; // add this
   late Box appBox;
 
   RxInt currentLevel = 0.obs;
@@ -16,7 +16,7 @@ class AppController extends GetxController {
   @override
   void onInit() {
     appBox = Hive.box('level');
-    appColor.value = Color(appBox.get('color'));
+    appColor.value = Color(appBox.get('color', defaultValue: 0xffece1cd));
     isDarkTheme.value = appBox.get('isDarkTheme', defaultValue: false);
     currentLevel.value = appBox.get('val', defaultValue: 0);
     super.onInit();

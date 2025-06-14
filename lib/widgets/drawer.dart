@@ -33,13 +33,20 @@ class SideNavigator extends StatelessWidget {
             label: const Text('Goal State'),
           ),
           TextButton.icon(
-            onPressed: () async {
-              Navigator.pop(context);
-              Get.back();
-              inAppPurchaseUtil.buyNonConsumable('8_puzzle');
-            },
+            onPressed: inAppPurchaseUtil.isSubscribed.value
+                ? null
+                : () async {
+                    inAppPurchaseUtil.isSubscribed;
+                    Navigator.pop(context);
+                    Get.back();
+                    inAppPurchaseUtil.buyNonConsumable('8_puzzle_subscription');
+                  },
             icon: const Icon(Icons.lock_open),
-            label: const Text('Unlock levels'),
+            label: Obx(() {
+              return Text(inAppPurchaseUtil.isSubscribed.value
+                  ? 'Levels Unlocked'
+                  : 'Unlock Levels');
+            }),
           ),
           TextButton.icon(
               onPressed: () {
