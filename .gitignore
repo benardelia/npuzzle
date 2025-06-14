@@ -44,4 +44,4 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-/assets/puzzle-google-play-service-account.json
+assets/puzzle-google-play-service-account.json
