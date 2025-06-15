@@ -94,11 +94,13 @@ class AdsController extends GetxController {
               // Called when the ad dismissed full screen content.
               onAdDismissedFullScreenContent: (ad) async {
                 AppController appController = Get.find();
-                var currentLevel = await appController.appBox.get('val');
-                Get.snackbar('One level Unlocked',
-                    'You can now play level ${currentLevel + 1}',
-                    snackPosition: SnackPosition.BOTTOM,
-                    duration: const Duration(seconds: 4));
+                // var currentLevel = await appController.appBox.get('val');
+                // Get.snackbar('One level Unlocked',
+                //     'You can now play level ${currentLevel + 1}',
+                //     snackPosition: SnackPosition.BOTTOM,
+                //     duration: const Duration(seconds: 4));
+                appController.resetPeriod();
+                appController.countDown();
                 // Dispose the ad here to free resources.
 
                 ad.dispose();
@@ -124,7 +126,6 @@ class AdsController extends GetxController {
   }
 
   showRewardedAd() {
-    AppController appController = Get.find();
     if (rewardedAd?.value == null) {
       Log.i('Rewarded ad is null, trying to load again');
       Get.snackbar(
@@ -138,12 +139,13 @@ class AdsController extends GetxController {
     rewardedAd!.value!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) async {
       // Reward the user for watching an ad.
-      var currentLevel = await appController.appBox.get('val');
-      appController.appBox.put('val', currentLevel + 1);
-      appController.currentLevel.value = currentLevel + 1;
+      // var currentLevel = await appController.appBox.get('val');
+      // appController.appBox.put('val', currentLevel + 1);
+      // appController.countDown(callback)
       // nextLevel(widget.level);
       // setState(() {});
     }).then((value) {
+      Log.w("In here now: AfterAdd");
       loadRewardedAd();
     });
   }

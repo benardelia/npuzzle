@@ -1,9 +1,11 @@
 import 'dart:async';
 import 'dart:ui';
 
-import 'package:get/get_rx/get_rx.dart';
-import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:npuzzle/state_management.dart/ads_controller.dart';
+import 'package:npuzzle/utils/logger.dart';
+import 'package:npuzzle/widgets/game_over_alert.dart';
 
 class AppController extends GetxController {
   RxBool isDarkTheme = false.obs;
@@ -22,17 +24,50 @@ class AppController extends GetxController {
     super.onInit();
   }
 
-  RxInt gamePeriod = 100.obs;
+  static int defaultPeriod = 12;
+
+  RxInt gamePeriod = defaultPeriod.obs;
+
+  resetPeriod({int? discount}) {
+    gamePeriod.value = defaultPeriod - (discount ?? 0);
+  }
 
   Timer? timer;
 
-  countDown(Function() callback) {
-    timer = Timer.periodic(const Duration(seconds: 1), (counts) async {
-      gamePeriod.value--;
-      if (gamePeriod.value < 1) {
-        await callback();
-        gamePeriod.value = 100;
-      }
-    });
+  countDown() {
+    try {
+      timer?.cancel();
+      Log.w('Game period: ${gamePeriod.value}');
+      timer = null;
+
+      timer = Timer.periodic(const Duration(seconds: 1), (counts) async {
+        gamePeriod.value--;
+        Log.i('Game period: ${gamePeriod.value}');
+        if (gamePeriod.value < 1) {
+          timer?.cancel();
+          Get.dialog(
+            GameOverAlert(
+              title: 'Time Up!',
+              message: '😎😌',
+              onNegativeAction: () async {
+                Get.back();
+                resetPeriod();
+                countDown();
+                // nextLevel(widget.level - 1);
+              },
+              onPositiveAction: () async {
+                await Get.find<AdsController>().showRewardedAd();
+                Get.back();
+                resetPeriod();
+              },
+              negativeActionText: 'Restart',
+              positiveActionText: 'Add Time',
+            ),
+          );
+        }
+      });
+    } catch (e) {
+      Log.e('Error in countDown: $e');
+    }
   }
 }

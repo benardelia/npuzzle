@@ -9,17 +9,19 @@ import 'package:npuzzle/levels.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:npuzzle/state_management.dart/ads_controller.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
+import 'package:npuzzle/utils/logger.dart';
+import 'package:npuzzle/widgets/game_over_alert.dart';
 
 class TilesGround extends StatefulWidget {
   const TilesGround(
       {super.key,
-      required this.size,
+      // required this.size,
       required this.position,
       required this.comparizon1,
       required this.comparizon2,
       required this.level,
       required this.highLevel});
-  final Size size;
+  // final Size size;
   final List<Offset> position;
   final Offset comparizon1;
   final Offset comparizon2;
@@ -42,22 +44,22 @@ class _TilesGroundState extends State<TilesGround> {
   ConfettiController confet = ConfettiController();
   final player = AudioPlayer();
 
-  AppController appController = Get.find<AppController>();
-  AdsController adsController = Get.find();
+  late AppController appController;
+  late AdsController adsController;
 
   @override
   void initState() {
+    appController = Get.find<AppController>();
+    adsController = Get.find();
     adsController.loadBannerAd();
-    super.initState();
     positionCopy.clear();
-
     for (var i in widget.position) {
       positionCopy.add(i);
     }
-    appController.countDown(() {
-      adsController.showRewardedAd();
+    super.initState();
+    Future.delayed(const Duration(seconds: 1), () {
+      appController.countDown();
     });
-    // loadRewardedAd();
   }
 
   @override
@@ -72,8 +74,8 @@ class _TilesGroundState extends State<TilesGround> {
     return Scaffold(
         body: Stack(children: [
       Positioned(
-          top: MediaQuery.of(context).size.height * 0.1,
-          left: MediaQuery.of(context).size.width * 0.05,
+          top: Get.height * 0.1,
+          left: Get.width * 0.05,
           child: Text('Level: ${widget.level}',
               style:
                   const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
@@ -111,10 +113,7 @@ class _TilesGroundState extends State<TilesGround> {
       tile(6),
       tile(7),
       target(context),
-      Positioned(
-          top: widget.size.height / 2,
-          left: widget.size.width / 2,
-          child: applause()),
+      Positioned(top: Get.height / 2, left: Get.width / 2, child: applause()),
       Align(
         alignment: Alignment.bottomCenter,
         child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
@@ -295,54 +294,33 @@ class _TilesGroundState extends State<TilesGround> {
               setState(() {
                 confet.play();
               });
-              showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                        content: SizedBox(
-                          height: 150,
-                          child: Center(
-                            child: Text(
-                              'You Won! \n  🤩😎',
-                              style: TextStyle(
-                                fontWeight: FontWeight.bold,
-                                fontSize: 30,
-                                color: appController.appColor.value,
-                                decoration: TextDecoration.none,
-                              ),
-                            ),
-                          ),
-                        ),
-                        actions: [
-                          TextButton(
-                              onPressed: () async {
-                                Navigator.of(context).pop();
-                                setState(() {
-                                  confet.stop();
-                                });
-                                nextLevel(widget.level - 1);
-                                await player.release();
-                              },
-                              style: TextButton.styleFrom(
-                                  backgroundColor: appController.appColor.value,
-                                  foregroundColor: Colors.white),
-                              child: const Text(
-                                'Restart',
-                              )),
-                          TextButton(
-                              onPressed: () async {
-                                Navigator.of(context).pop();
-                                setState(() {
-                                  confet.stop();
-                                });
-                                nextLevel(widget.level);
-                                await player.release();
-                              },
-                              style: TextButton.styleFrom(
-                                  backgroundColor: appController.appColor.value,
-                                  foregroundColor: Colors.white),
-                              child: const Text('Next level')),
-                        ],
-                      ));
+              appController.timer?.cancel();
+              Get.dialog(GameOverAlert(
+                title: 'You Won!',
+                message: '😎🥳',
+                onNegativeAction: () async {
+                  Get.back();
+                  confet.stop();
+                  positionCopy.clear();
+                  for (var i in widget.position) {
+                    positionCopy.add(i);
+                  }
+                  appController.resetPeriod();
+                  appController.countDown();
+                  setState(() {});
+                  await player.release();
+                },
+                onPositiveAction: () async {
+                  Get.back();
+                  setState(() {
+                    confet.stop();
+                  });
+                  await player.release();
+                  nextLevel(widget.level);
+                },
+                negativeActionText: 'Restart',
+                positiveActionText: 'Next level',
+              ));
             }
           }
         });
@@ -359,29 +337,24 @@ class _TilesGroundState extends State<TilesGround> {
     );
   }
 
-  nextLevel(int index) {
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context) {
-      if (index < 24) {
-        return TilesGround(
-          level: index + 1,
-          size: widget.size,
-          position:
-              Calculations.swapTiles(Levels.levels[index], Levels.winposition),
-          comparizon1: widget.comparizon1,
-          comparizon2: widget.comparizon2,
-          highLevel: widget.highLevel,
-        );
-      } else {
-        return TilesGround(
-          level: index + 1,
-          size: widget.size,
-          position: Calculations.swapTiles(
-              Calculations.generateSolvabePuzzle(), Levels.winposition),
-          comparizon1: widget.comparizon1,
-          comparizon2: widget.comparizon2,
-          highLevel: widget.highLevel,
-        );
-      }
-    }));
+  nextLevel(int index) async {
+    Get.back();
+    Get.to(index < 24
+        ? TilesGround(
+            level: index + 1,
+            position: Calculations.swapTiles(
+                Levels.levels[index], Levels.winposition),
+            comparizon1: widget.comparizon1,
+            comparizon2: widget.comparizon2,
+            highLevel: widget.highLevel,
+          )
+        : TilesGround(
+            level: index + 1,
+            position: Calculations.swapTiles(
+                Calculations.generateSolvabePuzzle(), Levels.winposition),
+            comparizon1: widget.comparizon1,
+            comparizon2: widget.comparizon2,
+            highLevel: widget.highLevel,
+          ));
   }
 }

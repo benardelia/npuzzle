@@ -189,6 +189,7 @@ class _LevelsState extends State<Levels> {
       ),
       drawer: const SideNavigator(),
       body: Obx(() {
+        //  just for Obx to work
         controller.currentLevel.value;
         return Padding(
           padding: const EdgeInsets.all(12.0),
@@ -203,7 +204,7 @@ class _LevelsState extends State<Levels> {
                           if (index < 25) {
                             return TilesGround(
                               level: index + 1,
-                              size: size,
+                              // size: size,
                               position:
                                   swapTiles(Levels.levels[index], position),
                               comparizon1: comparizon1,
@@ -213,7 +214,7 @@ class _LevelsState extends State<Levels> {
                           } else {
                             return TilesGround(
                               level: index + 1,
-                              size: size,
+                              // size: size,
                               position:
                                   swapTiles(generateSolvabePuzzle(), position),
                               comparizon1: comparizon1,
@@ -223,8 +224,10 @@ class _LevelsState extends State<Levels> {
                           }
                         }));
                       } else {
-                        Get.snackbar('Level Locked',
-                            'Your current level is ${controller.appBox.get('val') + 1} please finish previous levels', );
+                        Get.snackbar(
+                          'Level Locked',
+                          'Your current level is ${controller.appBox.get('val') + 1} please finish previous levels',
+                        );
                       }
                     },
                     child: Card(
@@ -233,9 +236,16 @@ class _LevelsState extends State<Levels> {
                       child: Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
+                          spacing: 4,
                           children: [
+                            const Text(
+                              'Level',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                  fontSize: 16, fontWeight: FontWeight.bold),
+                            ),
                             Text(
-                              'Level\n${index + 1}',
+                              '${index + 1}',
                               textAlign: TextAlign.center,
                               style: const TextStyle(
                                   fontSize: 16, fontWeight: FontWeight.bold),
