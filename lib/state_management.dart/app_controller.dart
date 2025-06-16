@@ -15,6 +15,8 @@ class AppController extends GetxController {
 
   RxInt currentLevel = 0.obs;
 
+  RxBool restart = false.obs;
+
   @override
   void onInit() {
     appBox = Hive.box('level');
@@ -37,12 +39,12 @@ class AppController extends GetxController {
   countDown() {
     try {
       timer?.cancel();
-      Log.w('Game period: ${gamePeriod.value}');
+      // Log.w('Game period: ${gamePeriod.value}');
       timer = null;
 
       timer = Timer.periodic(const Duration(seconds: 1), (counts) async {
         gamePeriod.value--;
-        Log.i('Game period: ${gamePeriod.value}');
+        // Log.i('Game period: ${gamePeriod.value}');
         if (gamePeriod.value < 1) {
           timer?.cancel();
           Get.dialog(
@@ -53,6 +55,7 @@ class AppController extends GetxController {
                 Get.back();
                 resetPeriod();
                 countDown();
+                restart.value = true;
                 // nextLevel(widget.level - 1);
               },
               onPositiveAction: () async {

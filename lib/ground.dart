@@ -9,6 +9,7 @@ import 'package:npuzzle/levels.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:npuzzle/state_management.dart/ads_controller.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
+import 'package:npuzzle/utils/logger.dart';
 import 'package:npuzzle/widgets/game_over_alert.dart';
 
 class TilesGround extends StatefulWidget {
@@ -57,6 +58,7 @@ class _TilesGroundState extends State<TilesGround> {
     }
     super.initState();
     Future.delayed(const Duration(seconds: 1), () {
+      appController.resetPeriod();
       appController.countDown();
     });
   }
@@ -70,72 +72,77 @@ class _TilesGroundState extends State<TilesGround> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        body: Stack(children: [
-      Positioned(
-          top: Get.height * 0.1,
-          left: Get.width * 0.05,
-          child: Text('Level: ${widget.level}',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-      Positioned(
-          top: MediaQuery.of(context).size.height * 0.1,
-          left: MediaQuery.of(context).size.width * 0.45,
-          child: Text('Moves: $moves',
-              style:
-                  const TextStyle(fontWeight: FontWeight.bold, fontSize: 15))),
-      Positioned(
-          top: MediaQuery.of(context).size.height * 0.07,
-          left: MediaQuery.of(context).size.width * 0.8,
-          child: IconButton(
-              onPressed: () {
-                // loadRewardedAd();
-                adsController.showRewardedAd();
-              },
-              icon: Icon(
-                Icons.lightbulb,
-                color: moves > 50
-                    ? const Color.fromARGB(255, 247, 172, 11)
-                    : moves > 40
-                        ? const Color.fromARGB(255, 33, 233, 15)
-                        : moves > 30
-                            ? const Color.fromARGB(255, 126, 240, 116)
-                            : const Color.fromARGB(255, 238, 226, 201),
-                size: MediaQuery.of(context).size.height * 0.07,
-              ))),
-      tile(0),
-      tile(1),
-      tile(2),
-      tile(3),
-      tile(4),
-      tile(5),
-      tile(6),
-      tile(7),
-      target(context),
-      Positioned(top: Get.height / 2, left: Get.width / 2, child: applause()),
-      Align(
-        alignment: Alignment.bottomCenter,
-        child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
-          Container(
-            decoration: BoxDecoration(
-                color: Colors.white.withAlpha(20),
-                borderRadius: BorderRadius.circular(20)),
-            child: Obx(() {
-              return Padding(
+    return Scaffold(body: Obx(() {
+      if (appController.restart.value == true) {
+        positionCopy.clear();
+        for (var i in widget.position) {
+          positionCopy.add(i);
+        }
+        Log.i("should restart level");
+        appController.restart.value = false;
+      }
+      return Stack(children: [
+        Positioned(
+            top: Get.height * 0.1,
+            left: Get.width * 0.05,
+            child: Text('Level: ${widget.level}',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 15))),
+        Positioned(
+            top: MediaQuery.of(context).size.height * 0.1,
+            left: MediaQuery.of(context).size.width * 0.45,
+            child: Text('Moves: $moves',
+                style: const TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 15))),
+        Positioned(
+            top: MediaQuery.of(context).size.height * 0.07,
+            left: MediaQuery.of(context).size.width * 0.8,
+            child: IconButton(
+                onPressed: () {
+                  // loadRewardedAd();
+                  adsController.showRewardedAd();
+                },
+                icon: Icon(
+                  Icons.lightbulb,
+                  color: moves > 50
+                      ? const Color.fromARGB(255, 247, 172, 11)
+                      : moves > 40
+                          ? const Color.fromARGB(255, 33, 233, 15)
+                          : moves > 30
+                              ? const Color.fromARGB(255, 126, 240, 116)
+                              : const Color.fromARGB(255, 238, 226, 201),
+                  size: MediaQuery.of(context).size.height * 0.07,
+                ))),
+        tile(0),
+        tile(1),
+        tile(2),
+        tile(3),
+        tile(4),
+        tile(5),
+        tile(6),
+        tile(7),
+        target(context),
+        Positioned(top: Get.height / 2, left: Get.width / 2, child: applause()),
+        Align(
+          alignment: Alignment.bottomCenter,
+          child: Column(mainAxisAlignment: MainAxisAlignment.end, children: [
+            Container(
+              decoration: BoxDecoration(
+                  color: Colors.white.withAlpha(20),
+                  borderRadius: BorderRadius.circular(20)),
+              child: Padding(
                 padding: const EdgeInsets.all(18.0),
                 child: Text(
                     'Remaining Time: ${appController.gamePeriod.value.toString().padLeft(2, '0')}'),
-              );
-            }),
-          ),
-          const Divider(
-            height: 10,
-          ),
-          // ad shown here
-          // _ad != null
-          adsController.bunnerAd?.value != null
-              ? Obx(() {
-                  return Align(
+              ),
+            ),
+            const Divider(
+              height: 10,
+            ),
+            // ad shown here
+            // _ad != null
+            adsController.bunnerAd?.value != null
+                ? Align(
                     alignment: Alignment.bottomCenter,
                     child: Container(
                       width:
@@ -146,17 +153,17 @@ class _TilesGroundState extends State<TilesGround> {
                         ad: adsController.bunnerAd!.value,
                       ),
                     ),
-                  );
-                })
-              : const SizedBox(
-                  height: 80,
-                ),
-          const SizedBox(
-            height: 10,
-          )
-        ]),
-      )
-    ]));
+                  )
+                : const SizedBox(
+                    height: 80,
+                  ),
+            const SizedBox(
+              height: 10,
+            )
+          ]),
+        )
+      ]);
+    }));
   }
 
   // methode to generate solvable puzzle by checkimg number of inversions
