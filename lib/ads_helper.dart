@@ -57,6 +57,21 @@ class AdHelper {
     }
     throw UnsupportedError("Unsupported platform");
   }
+
+  static String get interstitialAdUnitId {
+    if (kDebugMode) {
+      return AdHelperTest.interstitialAdUnitId;
+    }
+
+    if (Platform.isAndroid) {
+      // TODO: replace with your actual interstitial ad unit ID
+      return '';
+    } else if (Platform.isIOS) {
+      // to be implemented
+      return '';
+    }
+    throw UnsupportedError("Unsupported platform");
+  }
 }
 
 // Ad helper for test ad
@@ -98,6 +113,16 @@ class AdHelperTest {
       return 'ca-app-pub-3940256099942544/1712485313';
     } else {
       throw UnsupportedError('Unsupported platform');
+    }
+  }
+
+  static String get interstitialAdUnitId {
+    if (Platform.isAndroid) {
+      return "ca-app-pub-3940256099942544/1033173712";
+    } else if (Platform.isIOS) {
+      return "ca-app-pub-3940256099942544/4411468910";
+    } else {
+      throw UnsupportedError("Unsupported platform");
     }
   }
 }

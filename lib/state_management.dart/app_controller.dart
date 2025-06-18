@@ -26,7 +26,7 @@ class AppController extends GetxController {
     super.onInit();
   }
 
-  static int defaultPeriod = 12;
+  static int defaultPeriod = 99;
 
   RxInt gamePeriod = defaultPeriod.obs;
 

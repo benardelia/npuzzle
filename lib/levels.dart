@@ -4,8 +4,10 @@ import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:npuzzle/ads_helper.dart';
 import 'package:npuzzle/ground.dart';
+import 'package:npuzzle/inapp_purchase/inapp_purchase_util.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
 import 'package:npuzzle/widgets/drawer.dart';
+import 'package:npuzzle/widgets/game_over_alert.dart';
 import 'package:npuzzle/widgets/instruction.dart';
 
 class Levels extends StatefulWidget {
@@ -162,6 +164,8 @@ class _LevelsState extends State<Levels> {
     Offset comparizon2 = position[8] - position[5];
     Levels.winposition = position;
 
+    final inAppPurchaseUtil = Get.find<InAppPurchaseUtil>();
+
     return Scaffold(
       extendBody: true,
       extendBodyBehindAppBar: true,
@@ -224,10 +228,26 @@ class _LevelsState extends State<Levels> {
                           }
                         }));
                       } else {
-                        Get.snackbar(
-                          'Level Locked',
-                          'Your current level is ${controller.appBox.get('val') + 1} please finish previous levels',
-                        );
+                        // Get.snackbar(
+                        //   'Level Locked',
+                        //   'Your current level is ${controller.appBox.get('val') + 1} please finish previous levels',
+                        // );
+
+                        Get.dialog(GameOverAlert(
+                          title: 'Level Locked!',
+                          message: 'Subscribe to unlock all levels',
+                          negativeActionText: 'Cancel',
+                          positiveActionText: 'Subscribe',
+                          messageSize: 18,
+                          onNegativeAction: () {
+                            Get.back();
+                          },
+                          onPositiveAction: () {
+                            Get.back();
+                            inAppPurchaseUtil
+                                .buyNonConsumable('8_puzzle_subscription');
+                          },
+                        ));
                       }
                     },
                     child: Card(

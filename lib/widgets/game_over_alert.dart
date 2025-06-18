@@ -10,20 +10,22 @@ class GameOverAlert extends StatelessWidget {
       this.message,
       this.title,
       this.positiveActionText,
-      this.negativeActionText});
+      this.negativeActionText,
+      this.messageSize});
   final void Function()? onNegativeAction;
   final void Function()? onPositiveAction;
   final String? message;
   final String? title;
   final String? positiveActionText;
   final String? negativeActionText;
+  final double? messageSize;
 
   @override
   Widget build(BuildContext context) {
     AppController appController = Get.find<AppController>();
     var style = TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 30,
+      fontSize: 28,
       color: appController.appColor.value,
       decoration: TextDecoration.none,
     );
@@ -42,7 +44,7 @@ class GameOverAlert extends StatelessWidget {
             Text(
               message ??
                   'You have run out of time. \n Do you want to add more time or restart the game?',
-              style: style,
+              style: style.copyWith(fontSize: messageSize ?? 30),
             ),
           ],
         ),

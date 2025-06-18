@@ -9,7 +9,7 @@ import 'package:npuzzle/utils/logger.dart';
 class AdsController extends GetxController {
   Rx<BannerAd>? bunnerAd;
   Rx<NativeAd>? nativeAd;
-  Rx<InterstitialAd>? interstitialAd;
+  Rx<InterstitialAd?>? interstitialAd;
   Rx<RewardedAd?>? rewardedAd;
   Rx<RewardedInterstitialAd>? rewardedInterstitialAd;
 
@@ -21,13 +21,14 @@ class AdsController extends GetxController {
     // Initialize ads
     loadBannerAd();
     loadRewardedAd();
+    loadInterstitialAd();
   }
 
   @override
   void onClose() {
     bunnerAd?.value.dispose();
     nativeAd?.value.dispose();
-    interstitialAd?.value.dispose();
+    interstitialAd?.value?.dispose();
     rewardedAd?.value?.dispose();
     rewardedInterstitialAd?.value.dispose();
 
@@ -147,6 +148,45 @@ class AdsController extends GetxController {
     }).then((value) {
       Log.w("In here now: AfterAdd");
       loadRewardedAd();
+    });
+  }
+
+  // TODO: Implement _loadInterstitialAd()
+  void loadInterstitialAd() {
+    interstitialAd = Rx<InterstitialAd?>(null);
+    InterstitialAd.load(
+      adUnitId: AdHelper.interstitialAdUnitId,
+      request: AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) {
+          ad.fullScreenContentCallback = FullScreenContentCallback(
+            onAdDismissedFullScreenContent: (ad) {
+              // TODO: navigate to the next level
+            },
+          );
+
+          interstitialAd?.value = ad;
+        },
+        onAdFailedToLoad: (err) {
+          print('Failed to load an interstitial ad: ${err.message}');
+        },
+      ),
+    );
+  }
+
+  showInterstitialAd() {
+    if (interstitialAd?.value == null) {
+      Log.i('InterstitialAd ad is null, trying to load again');
+      Get.snackbar(
+          'Unlocked level', 'InterstitialAd ad failed to load, trying again...',
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 2));
+      loadInterstitialAd();
+      return;
+    }
+
+    interstitialAd!.value!.show().then((value) {
+      loadInterstitialAd();
     });
   }
 }
