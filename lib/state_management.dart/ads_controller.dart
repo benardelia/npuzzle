@@ -151,17 +151,26 @@ class AdsController extends GetxController {
     });
   }
 
-  // TODO: Implement _loadInterstitialAd()
   void loadInterstitialAd() {
     interstitialAd = Rx<InterstitialAd?>(null);
     InterstitialAd.load(
       adUnitId: AdHelper.interstitialAdUnitId,
-      request: AdRequest(),
+      request: const AdRequest(),
       adLoadCallback: InterstitialAdLoadCallback(
         onAdLoaded: (ad) {
           ad.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
               // TODO: navigate to the next level
+              AppController appController = Get.find();
+
+              appController.resetPeriod();
+
+              if (Get.isDialogOpen == true) {
+                Future.delayed((const Duration(milliseconds: 300)), () {
+                  Get.back();
+                  appController.countDown();
+                });
+              }
             },
           );
 

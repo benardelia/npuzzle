@@ -52,6 +52,7 @@ class _TilesGroundState extends State<TilesGround> {
     appController = Get.find<AppController>();
     adsController = Get.find();
     adsController.loadBannerAd();
+    adsController.showInterstitialAd();
     positionCopy.clear();
     for (var i in widget.position) {
       positionCopy.add(i);
@@ -94,25 +95,6 @@ class _TilesGroundState extends State<TilesGround> {
             child: Text('Moves: $moves',
                 style: const TextStyle(
                     fontWeight: FontWeight.bold, fontSize: 15))),
-        Positioned(
-            top: MediaQuery.of(context).size.height * 0.07,
-            left: MediaQuery.of(context).size.width * 0.8,
-            child: IconButton(
-                onPressed: () {
-                  // loadRewardedAd();
-                  adsController.showRewardedAd();
-                },
-                icon: Icon(
-                  Icons.lightbulb,
-                  color: moves > 50
-                      ? const Color.fromARGB(255, 247, 172, 11)
-                      : moves > 40
-                          ? const Color.fromARGB(255, 33, 233, 15)
-                          : moves > 30
-                              ? const Color.fromARGB(255, 126, 240, 116)
-                              : const Color.fromARGB(255, 238, 226, 201),
-                  size: MediaQuery.of(context).size.height * 0.07,
-                ))),
         tile(0),
         tile(1),
         tile(2),
@@ -136,6 +118,19 @@ class _TilesGroundState extends State<TilesGround> {
                     'Remaining Time: ${appController.gamePeriod.value.toString().padLeft(2, '0')}'),
               ),
             ),
+            TextButton(
+                onPressed: () {
+                  // loadRewardedAd();
+                  adsController.showRewardedAd();
+                },
+                style: TextButton.styleFrom(
+                    backgroundColor: appController.appColor.value,
+                    foregroundColor: Colors.white),
+                child: const Text(
+                  'Add Time',
+                  style: TextStyle(fontSize: 12),
+                )),
+
             const Divider(
               height: 10,
             ),

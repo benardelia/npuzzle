@@ -25,7 +25,7 @@ class GameOverAlert extends StatelessWidget {
     AppController appController = Get.find<AppController>();
     var style = TextStyle(
       fontWeight: FontWeight.bold,
-      fontSize: 28,
+      fontSize: 25,
       color: appController.appColor.value,
       decoration: TextDecoration.none,
     );
@@ -34,6 +34,7 @@ class GameOverAlert extends StatelessWidget {
         backgroundColor: appController.appColor.value,
         foregroundColor: Colors.white);
     return AlertDialog(
+      
       content: SizedBox(
         height: 160,
         child: Column(
@@ -55,11 +56,15 @@ class GameOverAlert extends StatelessWidget {
             style: buttonStyle,
             child: Text(
               negativeActionText ?? 'Restart',
+              style: TextStyle(fontSize: 12),
             )),
         TextButton(
             onPressed: onPositiveAction,
             style: buttonStyle,
-            child: Text(positiveActionText ?? 'Add Time')),
+            child: Text(
+              positiveActionText ?? 'Add Time',
+              style: TextStyle(fontSize: 12),
+            )),
       ],
     );
   }

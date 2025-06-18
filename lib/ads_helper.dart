@@ -64,8 +64,7 @@ class AdHelper {
     }
 
     if (Platform.isAndroid) {
-      // TODO: replace with your actual interstitial ad unit ID
-      return '';
+      return 'ca-app-pub-9035859643875042/3968793840';
     } else if (Platform.isIOS) {
       // to be implemented
       return '';

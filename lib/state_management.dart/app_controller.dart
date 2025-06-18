@@ -26,7 +26,7 @@ class AppController extends GetxController {
     super.onInit();
   }
 
-  static int defaultPeriod = 99;
+  static int defaultPeriod = 30;
 
   RxInt gamePeriod = defaultPeriod.obs;
 
@@ -66,6 +66,7 @@ class AppController extends GetxController {
               negativeActionText: 'Restart',
               positiveActionText: 'Add Time',
             ),
+            barrierDismissible: false,
           );
         }
       });
