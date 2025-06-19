@@ -170,6 +170,7 @@ class _LevelsState extends State<Levels> {
       extendBody: true,
       extendBodyBehindAppBar: true,
       floatingActionButton: FloatingActionButton(
+        backgroundColor: controller.appColor.value.withBlue(150),
         onPressed: () {
           showDialog(
               context: context,

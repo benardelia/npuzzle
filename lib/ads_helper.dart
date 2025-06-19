@@ -71,6 +71,19 @@ class AdHelper {
     }
     throw UnsupportedError("Unsupported platform");
   }
+  static String get appOpenAdUnitId {
+    if (kDebugMode) {
+      return AdHelperTest.appOpenAdUnitId;
+    }
+
+    if (Platform.isAndroid) {
+      return 'ca-app-pub-9035859643875042/6165929386';
+    } else if (Platform.isIOS) {
+      // to be implemented
+      return '';
+    }
+    throw UnsupportedError("Unsupported platform");
+  }
 }
 
 // Ad helper for test ad
@@ -120,6 +133,17 @@ class AdHelperTest {
       return "ca-app-pub-3940256099942544/1033173712";
     } else if (Platform.isIOS) {
       return "ca-app-pub-3940256099942544/4411468910";
+    } else {
+      throw UnsupportedError("Unsupported platform");
+    }
+  }
+
+
+  static String get appOpenAdUnitId {
+    if (Platform.isAndroid) {
+      return "ca-app-pub-3940256099942544/9257395921";
+    } else if (Platform.isIOS) {
+      return "ca-app-pub-3940256099942544/5575463023";
     } else {
       throw UnsupportedError("Unsupported platform");
     }

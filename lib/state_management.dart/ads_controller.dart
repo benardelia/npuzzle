@@ -12,6 +12,8 @@ class AdsController extends GetxController {
   Rx<InterstitialAd?>? interstitialAd;
   Rx<RewardedAd?>? rewardedAd;
   Rx<RewardedInterstitialAd>? rewardedInterstitialAd;
+  Rx<AppOpenAd?>? appOpenAd;
+  RxInt appOpenCount = 0.obs;
 
   int tries = 0;
 
@@ -22,6 +24,8 @@ class AdsController extends GetxController {
     loadBannerAd();
     loadRewardedAd();
     loadInterstitialAd();
+    loadAppOpenAd();
+    listenToAppStateChanges();
   }
 
   @override
@@ -31,9 +35,12 @@ class AdsController extends GetxController {
     interstitialAd?.value?.dispose();
     rewardedAd?.value?.dispose();
     rewardedInterstitialAd?.value.dispose();
+    appOpenAd?.value?.dispose();
 
     super.onClose();
   }
+
+  // --------------------------------  Banner Ad ------------------------------------------
 
   loadBannerAd() {
     if (bunnerAd?.value != null) {
@@ -62,6 +69,8 @@ class AdsController extends GetxController {
 
     bunnerAd!.value.load();
   }
+
+  // --------------------------------  Rewarded Ad ------------------------------------------
 
   void loadRewardedAd() {
     rewardedAd = Rx<RewardedAd?>(null);
@@ -139,17 +148,14 @@ class AdsController extends GetxController {
 
     rewardedAd!.value!.show(
         onUserEarnedReward: (AdWithoutView ad, RewardItem rewardItem) async {
-      // Reward the user for watching an ad.
-      // var currentLevel = await appController.appBox.get('val');
-      // appController.appBox.put('val', currentLevel + 1);
-      // appController.countDown(callback)
-      // nextLevel(widget.level);
-      // setState(() {});
+      Log.i('User earn reward');
     }).then((value) {
       Log.w("In here now: AfterAdd");
       loadRewardedAd();
     });
   }
+
+  // --------------------------------  Interstitial Ad ------------------------------------------
 
   void loadInterstitialAd() {
     interstitialAd = Rx<InterstitialAd?>(null);
@@ -197,5 +203,80 @@ class AdsController extends GetxController {
     interstitialAd!.value!.show().then((value) {
       loadInterstitialAd();
     });
+  }
+
+  // --------------------------------  App Open Ad ------------------------------------------
+
+  bool _isShowingAd = false;
+
+  void listenToAppStateChanges() {
+    AppStateEventNotifier.startListening();
+    AppStateEventNotifier.appStateStream.forEach((state) {
+      Log.i(state.name);
+      _onAppStateChanged(state);
+    });
+  }
+
+  void _onAppStateChanged(AppState appState) {
+    // Try to show an app open ad if the app is being resumed and
+    // we're not already showing an app open ad.
+    if (appState == AppState.foreground) {
+      showAppOpenAd();
+    }
+  }
+
+  void loadAppOpenAd() {
+    appOpenAd = Rx<AppOpenAd?>(null);
+    AppOpenAd.load(
+      adUnitId: AdHelper.appOpenAdUnitId,
+      request: const AdRequest(),
+      adLoadCallback: AppOpenAdLoadCallback(
+        onAdLoaded: (ad) {
+          Log.e('*****************AppOpenAd loaded successful');
+          appOpenAd!.value = ad;
+        },
+        onAdFailedToLoad: (error) {
+          Log.e('AppOpenAd failed to load: $error');
+          // Handle the error.
+        },
+      ),
+    );
+  }
+
+  void showAppOpenAd() {
+    if (appOpenAd?.value == null) {
+      Log.w('Tried to show ad before available.');
+      loadAppOpenAd();
+      return;
+    }
+    if (_isShowingAd) {
+      Log.w('Tried to show ad while already showing an ad.');
+      return;
+    }
+
+    Log.i('Showing App Open Ads');
+    // Set the fullScreenContentCallback and show the ad.
+    appOpenAd!.value!.fullScreenContentCallback = FullScreenContentCallback(
+      onAdShowedFullScreenContent: (ad) {
+        appOpenCount.value = 0;
+        _isShowingAd = true;
+        Log.i('$ad onAdShowedFullScreenContent');
+      },
+      onAdFailedToShowFullScreenContent: (ad, error) {
+        Log.e('$ad onAdFailedToShowFullScreenContent: $error');
+        _isShowingAd = false;
+        ad.dispose();
+        appOpenAd!.value = null;
+      },
+      onAdDismissedFullScreenContent: (ad) {
+        Log.i('$ad onAdDismissedFullScreenContent');
+        _isShowingAd = false;
+        ad.dispose();
+        appOpenAd!.value = null;
+        loadAppOpenAd();
+      },
+    );
+
+    appOpenAd!.value!.show();
   }
 }

@@ -300,7 +300,9 @@ class _TilesGroundState extends State<TilesGround> {
                 title: 'You Won!',
                 message: '😎🥳',
                 onNegativeAction: () async {
+                  Get.closeAllSnackbars();
                   Get.back();
+
                   confet.stop();
                   positionCopy.clear();
                   for (var i in widget.position) {
@@ -312,6 +314,7 @@ class _TilesGroundState extends State<TilesGround> {
                   await player.release();
                 },
                 onPositiveAction: () async {
+                  Get.closeAllSnackbars();
                   Get.back();
                   setState(() {
                     confet.stop();
@@ -339,7 +342,12 @@ class _TilesGroundState extends State<TilesGround> {
   }
 
   nextLevel(int index) async {
-    Get.back();
+    Log.d('Next level');
+    // Close all snackbars before navigating to prevent LateInitializationError
+    Get.closeAllSnackbars();
+    await Future.delayed(const Duration(milliseconds: 100));
+    Get.back(closeOverlays: true);
+    await Future.delayed(const Duration(milliseconds: 100));
     Get.to(index < 24
         ? TilesGround(
             level: index + 1,

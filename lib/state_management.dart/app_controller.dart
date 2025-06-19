@@ -59,8 +59,8 @@ class AppController extends GetxController {
                 // nextLevel(widget.level - 1);
               },
               onPositiveAction: () async {
-                await Get.find<AdsController>().showRewardedAd();
                 Get.back();
+                Get.find<AdsController>().showRewardedAd();
                 resetPeriod();
               },
               negativeActionText: 'Restart',
