@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:npuzzle/audioplayer.dart';
 import 'package:npuzzle/calculations.dart';
+import 'package:npuzzle/firebase_analytics.dart';
 import 'package:npuzzle/levels.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'package:npuzzle/state_management.dart/ads_controller.dart';
@@ -296,6 +297,7 @@ class _TilesGroundState extends State<TilesGround> {
                 confet.play();
               });
               appController.timer?.cancel();
+              FirebaseAnalyticsService.logLevelUp(level: widget.level + 1);
               Get.dialog(GameOverAlert(
                 title: 'You Won!',
                 message: '😎🥳',

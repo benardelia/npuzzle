@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "115692834632",
+    "project_id": "puzzle-71806852",
+    "storage_bucket": "puzzle-71806852.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115692834632:android:3acb787bcdfbcebfe66d7d",
+        "android_client_info": {
+          "package_name": "com.bravetech.npuzzle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBTcttrlR9lakzF85ubkyb95ly7U2e3ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:115692834632:android:ba948f11c371b1bbe66d7d",
+        "android_client_info": {
+          "package_name": "tz.go.lands.ilmis_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBTcttrlR9lakzF85ubkyb95ly7U2e3ps"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

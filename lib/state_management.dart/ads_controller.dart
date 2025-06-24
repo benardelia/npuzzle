@@ -3,6 +3,7 @@ import 'dart:developer' as developer show log;
 import 'package:get/get.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:npuzzle/ads_helper.dart';
+import 'package:npuzzle/firebase_analytics.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
 import 'package:npuzzle/utils/logger.dart';
 
@@ -90,6 +91,11 @@ class AdsController extends GetxController {
               // Called when an impression occurs on the ad.
               onAdImpression: (ad) {
                 Log.i('Rewarded ad impression recorded');
+                FirebaseAnalyticsService.logAdImpression(
+                    adFormat: 'Rewarded Ad',
+                    adPlatform: 'AdMob',
+                    adUnitName: ad.adUnitId,
+                    adSource: 'Admob');
               },
               // Called when the ad failed to show full screen content.
               onAdFailedToShowFullScreenContent: (ad, err) {
@@ -109,8 +115,13 @@ class AdsController extends GetxController {
                 //     'You can now play level ${currentLevel + 1}',
                 //     snackPosition: SnackPosition.BOTTOM,
                 //     duration: const Duration(seconds: 4));
+
                 appController.resetPeriod();
+                await Future.delayed(const Duration(seconds: 1));
                 appController.countDown();
+                if (Get.isDialogOpen == true) {
+                  Get.back();
+                }
                 // Dispose the ad here to free resources.
 
                 ad.dispose();
@@ -151,6 +162,8 @@ class AdsController extends GetxController {
       Log.i('User earn reward');
     }).then((value) {
       Log.w("In here now: AfterAdd");
+      AppController appController = Get.find();
+      appController.timer?.cancel();
       loadRewardedAd();
     });
   }
@@ -177,6 +190,13 @@ class AdsController extends GetxController {
                   appController.countDown();
                 });
               }
+            },
+            onAdImpression: (ad) {
+              FirebaseAnalyticsService.logAdImpression(
+                  adFormat: 'Interstitial Ad',
+                  adPlatform: 'AdMob',
+                  adUnitName: ad.adUnitId,
+                  adSource: 'Admob');
             },
           );
 
@@ -274,6 +294,13 @@ class AdsController extends GetxController {
         ad.dispose();
         appOpenAd!.value = null;
         loadAppOpenAd();
+      },
+      onAdImpression: (ad) {
+        FirebaseAnalyticsService.logAdImpression(
+            adFormat: 'App Open Ad',
+            adPlatform: 'AdMob',
+            adUnitName: ad.adUnitId,
+            adSource: 'Admob');
       },
     );
 

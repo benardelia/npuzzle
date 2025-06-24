@@ -8,9 +8,14 @@ import 'package:npuzzle/levels.dart';
 import 'package:npuzzle/state_management.dart/app_controller.dart';
 import 'package:npuzzle/state_management.dart/controller_registry.dart';
 import 'package:npuzzle/utils/theme.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+  options: DefaultFirebaseOptions.currentPlatform,
+);
   unawaited(MobileAds.instance.initialize());
 
   await Hive.initFlutter();
