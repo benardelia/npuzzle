@@ -60,7 +60,7 @@ class _TilesGroundState extends State<TilesGround> {
     }
     super.initState();
     Future.delayed(const Duration(seconds: 1), () {
-      appController.resetPeriod();
+      appController.resetPeriod(discount: 1);
       appController.countDown();
     });
   }
@@ -310,7 +310,7 @@ class _TilesGroundState extends State<TilesGround> {
                   for (var i in widget.position) {
                     positionCopy.add(i);
                   }
-                  appController.resetPeriod();
+                  appController.resetPeriod(discount: 1);
                   appController.countDown();
                   setState(() {});
                   await player.release();

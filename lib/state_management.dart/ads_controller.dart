@@ -116,7 +116,7 @@ class AdsController extends GetxController {
                 //     snackPosition: SnackPosition.BOTTOM,
                 //     duration: const Duration(seconds: 4));
 
-                appController.resetPeriod();
+                appController.resetPeriod(discount: 1);
                 await Future.delayed(const Duration(seconds: 1));
                 appController.countDown();
                 if (Get.isDialogOpen == true) {
@@ -182,7 +182,7 @@ class AdsController extends GetxController {
               // TODO: navigate to the next level
               AppController appController = Get.find();
 
-              appController.resetPeriod();
+              appController.resetPeriod(discount: 1);
 
               if (Get.isDialogOpen == true) {
                 Future.delayed((const Duration(milliseconds: 300)), () {

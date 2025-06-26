@@ -30,7 +30,7 @@ class AppLifecycleController extends GetxController
     // Handle your logic here
     switch (state) {
       case AppLifecycleState.resumed:
-        Log.i("✅ App resumed");
+        Log.i("✅ App resumed: times ${adsController.appOpenCount}");
         if (adsController.appOpenCount > 5) {
           // this delay ensure if the game is in play ground should atleast pass one second for the the bottom code to work correct
           await Future.delayed(const Duration(milliseconds: 1600));

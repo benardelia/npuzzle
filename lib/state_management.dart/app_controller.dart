@@ -53,7 +53,7 @@ class AppController extends GetxController {
               message: '😎😌',
               onNegativeAction: () async {
                 Get.back();
-                resetPeriod();
+                resetPeriod(discount: 1);
                 countDown();
                 restart.value = true;
                 // nextLevel(widget.level - 1);
@@ -61,7 +61,7 @@ class AppController extends GetxController {
               onPositiveAction: () async {
                 Get.back();
                 Get.find<AdsController>().showRewardedAd();
-                resetPeriod();
+                resetPeriod(discount: 1);
               },
               negativeActionText: 'Restart',
               positiveActionText: 'Add Time',
