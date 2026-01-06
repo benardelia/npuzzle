@@ -63,7 +63,7 @@ class SideNavigator extends StatelessWidget {
           TextButton.icon(
             onPressed: () async {
               final Uri url = Uri.parse(
-                  'https://play.google.com/store/apps/details?id=com.bravetech.npuzzle');
+                  'https://play.google.com/store/apps/details?id=com.bravetechteam.npuzzle');
               if (!await launchUrl(url)) {
                 throw Exception('Could not launch $url');
               }

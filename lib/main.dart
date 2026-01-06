@@ -23,7 +23,7 @@ void main() async {
 
   if (box.isEmpty) {
     await box.put('val', 0);
-    await box.put('color', const Color(0xffa5773b).value);
+    await box.put('color', const Color(0xffa5773b).toARGB32());
   }
 
   registerControllers();

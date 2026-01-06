@@ -18,7 +18,7 @@ if (keystorePropertiesFile.exists()) {
 
 
 android {
-    namespace = "com.bravetech.npuzzle"
+    namespace = "com.bravetechteam.npuzzle"
     compileSdk = 35
     ndkVersion = flutter.ndkVersion
 
@@ -33,13 +33,13 @@ android {
 
     defaultConfig {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
-        applicationId "com.bravetech.npuzzle"
+        applicationId "com.bravetechteam.npuzzle"
 
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = 29
         targetSdk = 35
-        versionCode = 12
+        versionCode = 13
         versionName = "1.7"
     }
 

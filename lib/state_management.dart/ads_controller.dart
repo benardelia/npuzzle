@@ -203,7 +203,7 @@ class AdsController extends GetxController {
           interstitialAd?.value = ad;
         },
         onAdFailedToLoad: (err) {
-          print('Failed to load an interstitial ad: ${err.message}');
+          Log.e('Failed to load an interstitial ad: ${err.message}');
         },
       ),
     );

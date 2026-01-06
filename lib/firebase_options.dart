@@ -42,17 +42,17 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions web = FirebaseOptions(
     apiKey: 'AIzaSyDTeqGPrd5N04OUN1di2tUr9zTP7Lc7sck',
-    appId: '1:115692834632:web:3a4eb7f45990bf7de66d7d',
+    appId: '1:115692834632:web:fb3069d2028fcf3ce66d7d',
     messagingSenderId: '115692834632',
     projectId: 'puzzle-71806852',
     authDomain: 'puzzle-71806852.firebaseapp.com',
     storageBucket: 'puzzle-71806852.firebasestorage.app',
-    measurementId: 'G-62B06492R2',
+    measurementId: 'G-CZNGH8RE0F',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
     apiKey: 'AIzaSyDBTcttrlR9lakzF85ubkyb95ly7U2e3ps',
-    appId: '1:115692834632:android:3acb787bcdfbcebfe66d7d',
+    appId: '1:115692834632:android:6db1c6b779d907ace66d7d',
     messagingSenderId: '115692834632',
     projectId: 'puzzle-71806852',
     storageBucket: 'puzzle-71806852.firebasestorage.app',
@@ -60,11 +60,11 @@ class DefaultFirebaseOptions {
 
   static const FirebaseOptions ios = FirebaseOptions(
     apiKey: 'AIzaSyAZ2zD6EuYjqW0aC7FNLviIMshfsj04Ffs',
-    appId: '1:115692834632:ios:d4856c7dd33acb76e66d7d',
+    appId: '1:115692834632:ios:d9394268210429dae66d7d',
     messagingSenderId: '115692834632',
     projectId: 'puzzle-71806852',
     storageBucket: 'puzzle-71806852.firebasestorage.app',
-    iosBundleId: 'com.bravetech.npuzzle',
+    iosBundleId: 'com.bravetechteam.npuzzle',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
@@ -85,4 +85,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'puzzle-71806852.firebasestorage.app',
     measurementId: 'G-CZNGH8RE0F',
   );
+
 }

@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.bravetech.npuzzle</string>
+	<string>com.bravetechteam.npuzzle</string>
 	<key>PROJECT_ID</key>
 	<string>puzzle-71806852</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:115692834632:ios:d4856c7dd33acb76e66d7d</string>
+	<string>1:115692834632:ios:d9394268210429dae66d7d</string>
 </dict>
 </plist>

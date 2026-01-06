@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:115692834632:android:ba948f11c371b1bbe66d7d",
+        "mobilesdk_app_id": "1:115692834632:android:6db1c6b779d907ace66d7d",
         "android_client_info": {
-          "package_name": "tz.go.lands.ilmis_mobile"
+          "package_name": "com.bravetechteam.npuzzle"
         }
       },
       "oauth_client": [],
