@@ -798,20 +798,6 @@ class _TilesGroundState extends State<TilesGround>
       ),
     );
 
-    // Future.delayed(const Duration(milliseconds: 100), () {
-    //   Log.d('Going Next level $newLevel ✅');
-
-    //   Get.to(TilesGround(
-    //     level: newLevel,
-    //     position: Calculations.swapTiles(
-    //       puzzleConfig,
-    //       Levels.winposition,
-    //     ),
-    //     comparizon1: widget.comparizon1,
-    //     comparizon2: widget.comparizon2,
-    //     highLevel: widget.highLevel,
-    //   ));
-    // });
   }
 }
 

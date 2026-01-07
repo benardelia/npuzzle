@@ -517,6 +517,7 @@ class _LevelsState extends State<Levels> with SingleTickerProviderStateMixin {
 
   return newPositions;
 }
+
 }
 
 // /// FIXED: Generate solvable puzzle with correct winning configuration

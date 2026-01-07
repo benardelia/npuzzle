@@ -172,16 +172,17 @@ class Calculations {
   }
 
   /// Swap tiles based on puzzle configuration
+
   static List<Offset> swapTiles(List<int> puzzle, List<Offset> originalPositions) {
-    List<Offset> newPositions = List.filled(9, Offset.zero);
+  List<Offset> newPositions = List.filled(9, Offset.zero);
 
-    for (int i = 0; i < puzzle.length; i++) {
-      int tileNumber = puzzle[i];
-      newPositions[i] = originalPositions[tileNumber];
-    }
-
-    return newPositions;
+  for (int i = 0; i < puzzle.length; i++) {
+    int tileNumber = puzzle[i];
+    newPositions[tileNumber] = originalPositions[i]; // ← Fixed!
   }
+
+  return newPositions;
+}
 
   /// Check if a puzzle configuration is solvable
   static bool isSolvable(List<int> puzzle) {
@@ -262,6 +263,23 @@ class Calculations {
     print('Solvable: ${isSolvable(puzzle)}');
     print('Manhattan Distance: ${estimateMinimumMoves(puzzle)}');
     print('Difficulty: ${getDifficulty(puzzle)}');
+  }
+
+
+
+  static List<Offset> generatePositions(Size size) {
+    return List.generate(9, (index) {
+      double height = size.height / 2 / 3 - 10;
+      double width = size.width / 3 - 20;
+
+      int row = index ~/ 3;
+      int col = index % 3;
+
+      double x = (size.width * 0.2) + width * col + (col * (width * 0.08));
+      double y = size.height * 0.3 + (height + 10) * row;
+
+      return Offset(x, y);
+    });
   }
 }
 
